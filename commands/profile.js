@@ -3,10 +3,10 @@ const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('profile')
-        .setDescription('View your coaster profile or someone else\'s')
+        .setDescription('Returns a User\'s GuessTheCoaster Profile')
         .addUserOption(option =>
-            option.setName('target')
-                .setDescription('The user to view the profile of')
+            option.setName('user')
+                .setDescription('The Tag of the User\'s Profile to Display')
                 .setRequired(false)
         ),
 
@@ -18,8 +18,8 @@ module.exports = {
         client.db.query(`SELECT credits, streak, best_streak FROM users WHERE username = ?`, [username], (err, rows) => {
             if (err || rows.length === 0) {
                 const notFoundEmbed = new EmbedBuilder()
-                    .setTitle('❌ User Profile Not Found!')
-                    .setDescription('This user has never played and therefore does not have a profile.')
+                    .setTitle('User Profile Not Found!')
+                    .setDescription('This user has never played before.\nStart by using the **/guess** command to create a profile!')
                     .setColor(0xd9534f);
                 return interaction.reply({ embeds: [notFoundEmbed], ephemeral: true });
             }
@@ -72,7 +72,7 @@ module.exports = {
                         .setColor(0x1abc9c)
                         .setThumbnail(avatar)
                         .setDescription(
-                            `Credits: **${credits}** 🎢\n` +
+                            `Credits: **${credits}** 🪙\n` +
                             `Completion: **${completion}%**\n` +
                             `Collected: **${totalCollected}/${totalCoasters}**\n` +
                             `Best Streak: **${best_streak}** 🔥`
