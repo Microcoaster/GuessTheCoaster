@@ -91,9 +91,10 @@ client.on('messageCreate', async message => {
     const coasterName = userGuess.name;
 
     client.db.query(`
-        INSERT IGNORE INTO user_coasters (username, coaster_name)
-        VALUES (?, ?)
-    `, [username, coasterName]);
+        INSERT IGNORE INTO user_coasters (username, coaster_id)
+        SELECT ?, id FROM coasters WHERE LOWER(name) = ? OR LOWER(alias) = ?
+    `, [username, coasterName.toLowerCase(), coasterName.toLowerCase()]);
+    
 
     client.db.query(`
         INSERT INTO users (username, credits, streak)
