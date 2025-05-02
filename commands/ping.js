@@ -15,8 +15,8 @@ module.exports = {
             .setTitle('Pong!')
             .setColor(0x5865f2)
             .addFields(
-                { name: 'API Latency', value: `\`${apiLatency}ms\``, inline: true },
-                { name: 'Client Ping', value: `\`${botLatency}ms\``, inline: true }
+                { name: '✨ API Latency', value: `\`${apiLatency}ms\``, inline: true },
+                { name: '💯 Client Ping', value: `\`${botLatency}ms\``, inline: true }
             )
             .setTimestamp();
 
