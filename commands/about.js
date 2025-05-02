@@ -12,7 +12,7 @@ module.exports = {
                 `**GuessTheCoaster** is a Discord Bot where Users have to Guess the Name of a Roller Coaster from a large selection of coaster images. ` +
                 `Correct answers reward Credits and Completion which can be viewed on a User Profile or on Local/Global Leaderboards.\n\n` +
                 `The bot is coded entirely in **JavaScript**, powered by **Node.js**, using **Discord.js** for Discord interaction, and **MySQL** to store user stats and scores.\n\n` +
-                `Created by **Cybertrist**. All images are taken either by me or by users of the bot!\n\n`
+                `Created by **Batard**. All images are taken either by me or by users of the bot!\n\n`
             )
 
             .setColor(0x5865f2)
