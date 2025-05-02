@@ -63,8 +63,8 @@ module.exports = {
                     let badges = '';
                     if (completion >= 50) badges += '<:50Completion:1367798353559027824> ';
                     if (completion == 100) badges += '<:100Completion:1367798366116773979> ';
-                    if (streak >= 10) badges += '<:10Streak:1367800181709471824> ';
-                    if (streak >= 50) badges += '<:50Streak:1367800333144821801> ';
+                    if (best_streak >= 10) badges += '<:10Streak:1367800181709471824> ';
+                    if (best_streak >= 50) badges += '<:50Streak:1367800333144821801> ';
                     if (username.toLowerCase() === 'cybertrist') badges += '<:Owner:1367800341676167208> ';
 
                     const embed = new EmbedBuilder()
