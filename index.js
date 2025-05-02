@@ -97,29 +97,34 @@ client.on('messageCreate', async message => {
     
 
     client.db.query(`
-        INSERT INTO users (username, credits, streak)
-        VALUES (?, 1, 1)
-        ON DUPLICATE KEY UPDATE credits = credits + 1, streak = streak + 1, last_played = NOW()
+        INSERT INTO users (username, credits, streak, best_streak)
+        VALUES (?, 1, 1, 1)
+        ON DUPLICATE KEY UPDATE 
+            credits = credits + 1, 
+            streak = streak + 1,
+            best_streak = GREATEST(best_streak, streak + 1),
+            last_played = NOW()
     `, [username], err => {
         if (err) return console.error(err);
-
-        client.db.query(`SELECT credits, streak FROM users WHERE username = ?`, [username], (err, rows) => {
+    
+        client.db.query(`SELECT credits, streak, best_streak FROM users WHERE username = ?`, [username], (err, rows) => {
             if (err || rows.length === 0) return;
-
-            const { credits, streak } = rows[0];
-
+    
+            const { credits, streak, best_streak } = rows[0];
+    
             const embed = new EmbedBuilder()
                 .setColor(0x2ecc71)
                 .setTitle('GG!')
                 .setDescription(`**${username}** guessed "**${coasterName}**" correctly!`)
                 .addFields(
                     { name: '🏅 Crédit(s)', value: '+1', inline: true },
-                    { name: '🔥 Streak', value: `Streak of ${streak}`, inline: true }
+                    { name: '🔥 Best Streak', value: `${best_streak}`, inline: true }
                 );
-
+    
             message.reply({ embeds: [embed] });
         });
     });
+    
 
     delete client.activeGuesses[message.author.id];
 });

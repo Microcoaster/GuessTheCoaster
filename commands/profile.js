@@ -24,7 +24,7 @@ module.exports = {
                 return interaction.reply({ embeds: [notFoundEmbed], ephemeral: true });
             }
 
-            const { credits, streak } = rows[0];
+            const { credits, streak, best_streak } = rows[0];
 
             // Requête 1 : coasters collectés par difficulté
             client.db.query(`
@@ -75,7 +75,7 @@ module.exports = {
                             `Credits: **${credits}** 🎢\n` +
                             `Completion: **${completion}%**\n` +
                             `Collected: **${totalCollected}/${totalCoasters}**\n` +
-                            `Best Streak: **${streak}** 🔥`
+                            `Best Streak: **${best_streak}** 🔥`
                         )
                         .addFields(
                             {
