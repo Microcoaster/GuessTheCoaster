@@ -102,9 +102,9 @@ client.on('messageCreate', async message => {
         ON DUPLICATE KEY UPDATE 
             credits = credits + 1, 
             streak = streak + 1,
-            best_streak = GREATEST(best_streak, streak + 1),
+            best_streak = GREATEST(best_streak, streak),
             last_played = NOW()
-    `, [username], err => {
+    `, [username], err => {    
         if (err) return console.error(err);
     
         client.db.query(`SELECT credits, streak, best_streak FROM users WHERE username = ?`, [username], (err, rows) => {
