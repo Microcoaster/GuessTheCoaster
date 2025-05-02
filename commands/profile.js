@@ -15,7 +15,7 @@ module.exports = {
         const username = targetUser.username;
         const avatar = targetUser.displayAvatarURL();
 
-        client.db.query(`SELECT credits, streak FROM users WHERE username = ?`, [username], (err, rows) => {
+        client.db.query(`SELECT credits, streak, best_streak FROM users WHERE username = ?`, [username], (err, rows) => {
             if (err || rows.length === 0) {
                 const notFoundEmbed = new EmbedBuilder()
                     .setTitle('❌ User Profile Not Found!')

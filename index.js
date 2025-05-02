@@ -118,7 +118,7 @@ client.on('messageCreate', async message => {
                 .setDescription(`**${username}** guessed "**${coasterName}**" correctly!`)
                 .addFields(
                     { name: '🏅 Crédit(s)', value: '+1', inline: true },
-                    { name: '🔥 Best Streak', value: `${best_streak}`, inline: true }
+                    { name: '🔥 Streak', value: `${streak}`, inline: true }
                 );
     
             message.reply({ embeds: [embed] });
