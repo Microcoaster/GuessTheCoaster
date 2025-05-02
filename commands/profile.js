@@ -11,7 +11,7 @@ module.exports = {
         ),
 
     async execute(interaction, client) {
-        const targetUser = interaction.options.getUser('target') || interaction.user;
+        const targetUser = interaction.options.getUser('user') || interaction.user;
         const username = targetUser.username;
         const avatar = targetUser.displayAvatarURL();
 
