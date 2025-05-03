@@ -3,7 +3,7 @@ const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder } = r
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('leaderboard')
-        .setDescription('View the leaderboard for GuessTheCoaster'),
+        .setDescription('Returns the browsable Leaderboards for GuessTheCoaster'),
 
     async execute(interaction, client) {
         const guildId = interaction.guildId;

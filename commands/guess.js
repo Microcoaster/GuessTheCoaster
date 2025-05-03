@@ -3,10 +3,10 @@ const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('guess')
-        .setDescription('Play a round of GuessTheCoaster')
+        .setDescription('Guess the Name of a Roller Coaster from an Image')
         .addStringOption(option =>
             option.setName('difficulty')
-                .setDescription('Choose coaster difficulty')
+                .setDescription('The Difficulty of the Image to Guess')
                 .setRequired(false)
                 .addChoices(
                     { name: 'Random', value: 'random' },

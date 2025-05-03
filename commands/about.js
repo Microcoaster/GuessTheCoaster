@@ -3,7 +3,7 @@ const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('about')
-        .setDescription('Returns the About Page Bot Information'),
+        .setDescription('Returns the About Page with Bot Information'),
 
     async execute(interaction) {
         const embed = new EmbedBuilder()

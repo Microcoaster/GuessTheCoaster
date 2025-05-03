@@ -3,7 +3,7 @@ const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('badges')
-        .setDescription('Show all obtainable badges'),
+        .setDescription('Return a list of obtainable badges'),
 
     async execute(interaction) {
         const embed = new EmbedBuilder()
