@@ -121,22 +121,27 @@ client.on('messageCreate', async message => {
     `, [username, message.guildId], (err) => {
         if (err) return console.error(err);
 
-        // Étape 2 : mettre à jour les valeurs
+        // Étape 2 : incrémenter streak et crédits
         client.db.query(`
             UPDATE users
             SET 
                 credits = credits + ?,
                 streak = streak + 1,
-                best_streak = GREATEST(best_streak, streak + 1),
                 last_played = NOW()
             WHERE username = ?
         `, [creditGain, username], (err) => {
             if (err) return console.error(err);
 
+            // Étape 3 : vérifier et mettre à jour best_streak si nécessaire
             client.db.query(`SELECT credits, streak, best_streak FROM users WHERE username = ?`, [username], (err, rows) => {
                 if (err || rows.length === 0) return;
 
                 const { credits, streak, best_streak } = rows[0];
+
+                if (streak > best_streak) {
+                    client.db.query(`UPDATE users SET best_streak = ? WHERE username = ?`, [streak, username]);
+                }
+
                 const randomMessage = successMessages[Math.floor(Math.random() * successMessages.length)];
 
                 const embed = new EmbedBuilder()
@@ -154,6 +159,7 @@ client.on('messageCreate', async message => {
     });
 
     delete client.activeGuesses[message.author.id];
+
 });
 
 client.login(process.env.DISCORD_TOKEN);
