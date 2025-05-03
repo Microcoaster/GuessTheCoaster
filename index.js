@@ -103,27 +103,33 @@ client.on('messageCreate', async message => {
             credits = credits + 1, 
             streak = streak + 1,
             best_streak = GREATEST(best_streak, streak),
+            guild_id = VALUES(guild_id),
             last_played = NOW()
-    `, [username, message.guildId], err => {    
+    `, [username, message.guildId], err => {
         if (err) return console.error(err);
     
-        client.db.query(`SELECT credits, streak, best_streak FROM users WHERE username = ?`, [username], (err, rows) => {
-            if (err || rows.length === 0) return;
+        client.db.query(
+            `SELECT credits, streak, best_streak FROM users WHERE username = ?`,
+            [username],
+            (err, rows) => {
+                if (err || rows.length === 0) return;
     
-            const { credits, streak, best_streak } = rows[0];
+                const { credits, streak, best_streak } = rows[0];
     
-            const embed = new EmbedBuilder()
-                .setColor(0x2ecc71)
-                .setTitle('GG!')
-                .setDescription(`**${username}** guessed "**${coasterName}**" correctly!`)
-                .addFields(
-                    { name: '🏅 Crédit(s)', value: '+1', inline: true },
-                    { name: '🔥 Streak', value: `${streak}`, inline: true }
-                );
+                const embed = new EmbedBuilder()
+                    .setColor(0x2ecc71)
+                    .setTitle('GG!')
+                    .setDescription(`**${username}** guessed "**${coasterName}**" correctly!`)
+                    .addFields(
+                        { name: '🏅 Crédit(s)', value: '+1', inline: true },
+                        { name: '🔥 Streak', value: `${streak}`, inline: true }
+                    );
     
-            message.reply({ embeds: [embed] });
-        });
+                message.reply({ embeds: [embed] });
+            }
+        );
     });
+    
     
 
     delete client.activeGuesses[message.author.id];

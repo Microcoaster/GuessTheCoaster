@@ -45,15 +45,15 @@ module.exports = {
         const localCredits = await fetchData(`
             SELECT username, credits FROM users 
             WHERE guild_id = ? ORDER BY credits DESC LIMIT 10`, [guildId]);
-        const localCompletion = await fetchData(`
-            SELECT u.username, COUNT(DISTINCT uc.coaster_id) AS collected
-            FROM user_coasters uc
-            JOIN users u ON u.username = uc.username
-            WHERE u.guild_id = ?
-            GROUP BY uc.username
-            ORDER BY collected DESC
-            LIMIT 10
-        `);
+            const localCompletion = await fetchData(`
+                SELECT u.username, COUNT(DISTINCT uc.coaster_id) AS collected
+                FROM user_coasters uc
+                JOIN users u ON u.username = uc.username
+                WHERE u.guild_id = ?
+                GROUP BY uc.username
+                ORDER BY collected DESC
+                LIMIT 10
+            `, [guildId]);            
         const localStreak = await fetchData(`
             SELECT username, best_streak FROM users 
             WHERE guild_id = ? ORDER BY best_streak DESC LIMIT 10`, [guildId]);
