@@ -8,7 +8,7 @@ module.exports = {
     async execute(interaction, client) {
         if (client.currentCompetition && Date.now() < client.currentCompetition.timeout) {
             return interaction.reply({
-                content: '🚨 A competition is already in progress!',
+                content: 'A competition is already in progress!',
                 ephemeral: true
             });
         }
@@ -17,7 +17,7 @@ module.exports = {
             if (err || results.length === 0) {
                 console.error(err);
                 return interaction.reply({
-                    content: '❌ Failed to fetch a coaster from the database.',
+                    content: 'Failed to fetch a coaster from the database.',
                     ephemeral: true
                 });
             }
@@ -40,7 +40,7 @@ module.exports = {
             };
 
             // Initial reply
-            await interaction.reply({ embeds: [createEmbed(`⏱️ Time left: **${secondsLeft}s**`)] });
+            await interaction.reply({ embeds: [createEmbed(`Time left: **${secondsLeft}s**`)] });
             const replyMessage = await interaction.fetchReply();
 
             client.currentCompetition = {
@@ -62,7 +62,7 @@ module.exports = {
                     return;
                 }
 
-                interaction.editReply({ embeds: [createEmbed(`⏱️ Time left: **${secondsLeft}s**`)] }).catch(console.error);
+                interaction.editReply({ embeds: [createEmbed(`Time left: **${secondsLeft}s**`)] }).catch(console.error);
             }, 1000);
 
             setTimeout(() => {

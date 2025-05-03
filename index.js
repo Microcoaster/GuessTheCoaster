@@ -132,6 +132,8 @@ client.on('messageCreate', async message => {
             const coasterName = client.currentCompetition.name;
 
             client.currentCompetition.hasWinner = true;
+            client.currentCompetition = null;
+
 
             client.db.query(`
                 INSERT IGNORE INTO users (username, credits, streak, best_streak, contributor, competition_winner, guild_id)
@@ -156,27 +158,29 @@ client.on('messageCreate', async message => {
                             inline: true
                         });
 
-                    message.channel.send({ embeds: [embed] }).then(() => {
-                        // 🛠 Met à jour l'embed initial de la compétition
-                        if (client.currentCompetition && !client.currentCompetition.hasWinner) {
-                            const originalEmbed = client.currentCompetition.message.embeds?.[0];
-                            if (originalEmbed) {
-                                const updatedEmbed = EmbedBuilder.from(originalEmbed)
-                                    .setDescription(
-                                        `✅ The coaster was guessed by **${username}**!\n\n` +
-                                        '🎯 Be the **first** to guess the name of this coaster.\n' +
-                                        '<:competition_winner:1368317089156169739> Winner gets **+5 credits** and the **Competition Badge**!'
-                                    )
-                                    .setFooter({ text: '🏁 Competition over!' });
+                        message.channel.send({ embeds: [embed] }).then(() => {
+                            // 🛠 Met à jour l'embed initial de la compétition
+                            if (client.currentCompetition && !client.currentCompetition.hasWinner) {
+                                const originalEmbed = client.currentCompetition.message.embeds?.[0];
+                                if (originalEmbed) {
+                                    const updatedEmbed = EmbedBuilder.from(originalEmbed)
+                                        .setDescription(
+                                            `✅ The coaster was guessed by **${username}**!\n\n` +
+                                            '🎯 Be the **first** to guess the name of this coaster.\n' +
+                                            '<:competition_winner:1368317089156169739> Winner gets **+5 credits** and the **Competition Badge**!'
+                                        )
+                                        .setFooter({ text: '🏁 Competition over!' });
                         
-                                client.currentCompetition.message.edit({ embeds: [updatedEmbed] }).catch(console.error);
+                                    client.currentCompetition.message.edit({ embeds: [updatedEmbed] }).catch(console.error);
+                                }
                             }
-                        }                        
-                    
-                        client.currentCompetition = null;
-                    });
-                    
-                    client.currentCompetition = null;
+                        
+                            // ✅ Marque la victoire
+                            if (client.currentCompetition) {
+                                client.currentCompetition.hasWinner = true;
+                                client.currentCompetition = null;
+                            }
+                        });                        
                 });
             });
 
