@@ -40,7 +40,7 @@ module.exports = {
                 .setDescription(
                     'A public guessing round has started!\n\n' +
                     '🎯 Be the **first** to guess the name of this coaster.\n' +
-                    '🏆 Winner gets **+5 credits** and the **Competition Badge**!'
+                    '<:trophe:1368024238371508315> Winner gets **+5 credits** and the **Competition Badge**!'
                 )
                 .setImage(coaster.image_url)
                 .setColor(0xe67e22)

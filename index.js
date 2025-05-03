@@ -114,13 +114,10 @@ client.once('ready', () => {
 });
 
 
-// Détection des bonnes réponses
 client.on('messageCreate', async message => {
-    if (message.author.bot || !client.activeGuesses[message.author.id]) return;
+    if (message.author.bot) return;
 
-    const userGuess = client.activeGuesses[message.author.id];
-
-    // compétition
+    // 🎉 Mode Compétition (tout le monde peut participer)
     if (client.currentCompetition && Date.now() < client.currentCompetition.timeout) {
         const guess = message.content.toLowerCase().trim();
         const validAnswers = [
@@ -134,40 +131,42 @@ client.on('messageCreate', async message => {
             const username = message.author.username;
             const coasterName = client.currentCompetition.name;
 
-            // Ajouter l'utilisateur s'il n'existe pas encore
             client.db.query(`
                 INSERT IGNORE INTO users (username, credits, streak, best_streak, contributor, competition_winner, guild_id)
                 VALUES (?, 0, 0, 0, 0, 0, ?)
-            `, [username, message.guildId], (err) => {
+            `, [username, message.guildId], err => {
                 if (err) return console.error(err);
 
-                // Donner les crédits et activer le badge
                 client.db.query(`
                     UPDATE users
-                    SET credits = credits + 5,
-                        competition_winner = 1
+                    SET credits = credits + 5, competition_winner = 1
                     WHERE username = ?
-                `, [username], (err) => {
+                `, [username], err => {
                     if (err) return console.error(err);
 
                     const embed = new EmbedBuilder()
                         .setColor(0xf1c40f)
                         .setTitle("🏆 Competition Won!")
                         .setDescription(`**${username}** was the first to guess **${coasterName}**!`)
-                        .addFields({ name: '<:trophe:1368024238371508315> Reward', value: `+5 credits & unlocked the competition badge!`, inline: true });
+                        .addFields({
+                            name: '<:trophe:1368024238371508315> Reward',
+                            value: `+5 credits & unlocked the competition badge!`,
+                            inline: true
+                        });
 
                     message.channel.send({ embeds: [embed] });
                     client.currentCompetition = null;
                 });
             });
 
-            return;
+            return; // ✅ ne pas continuer avec le système normal
         }
+
+        return; // mauvaise réponse en compétition : rien ne se passe
     }
 
-
-
-
+    // 🎯 Système classique (guess personnel)
+    const userGuess = client.activeGuesses[message.author.id];
     if (!userGuess || Date.now() > userGuess.timeout) {
         delete client.activeGuesses[message.author.id];
         return;
@@ -180,13 +179,8 @@ client.on('messageCreate', async message => {
     ].filter(Boolean);
 
     const isCorrect = validAnswers.some(answer => guess.includes(answer));
+    if (!isCorrect) return;
 
-    if (!isCorrect) {
-        // ❌ Mauvaise réponse → ne rien faire, laisser le joueur retenter
-        return;
-    }
-
-    // ✅ Bonne réponse
     const username = message.author.username;
     const coasterName = userGuess.name;
     const difficulty = userGuess.difficulty?.toLowerCase() || "easy";
@@ -195,20 +189,17 @@ client.on('messageCreate', async message => {
     if (difficulty === "medium") creditGain = 2;
     else if (difficulty === "hard") creditGain = 3;
 
-    // Enregistrer le coaster collecté
     client.db.query(`
         INSERT IGNORE INTO user_coasters (username, coaster_id)
         SELECT ?, id FROM coasters WHERE LOWER(name) = ? OR LOWER(alias) = ?
     `, [username, coasterName.toLowerCase(), coasterName.toLowerCase()]);
 
-    // S'assurer que l'utilisateur existe
     client.db.query(`
         INSERT IGNORE INTO users (username, credits, streak, best_streak, guild_id)
         VALUES (?, 0, 0, 0, ?)
     `, [username, message.guildId], err => {
         if (err) return console.error(err);
 
-        // Incrémenter crédits et streak
         client.db.query(`
             UPDATE users
             SET credits = credits + ?, streak = streak + 1, last_played = NOW()
@@ -216,14 +207,10 @@ client.on('messageCreate', async message => {
         `, [creditGain, username], err => {
             if (err) return console.error(err);
 
-            client.db.query(`
-                SELECT credits, streak, best_streak FROM users WHERE username = ?
-            `, [username], (err, rows) => {
+            client.db.query(`SELECT credits, streak, best_streak FROM users WHERE username = ?`, [username], (err, rows) => {
                 if (err || rows.length === 0) return;
 
                 const { credits, streak, best_streak } = rows[0];
-
-                // Mettre à jour le best_streak si nécessaire
                 if (streak > best_streak) {
                     client.db.query(`UPDATE users SET best_streak = ? WHERE username = ?`, [streak, username]);
                 }
@@ -240,11 +227,12 @@ client.on('messageCreate', async message => {
                     );
 
                 message.reply({ embeds: [embed] }).catch(console.error);
-                delete client.activeGuesses[message.author.id]; // ✅ Ne supprimer qu'après succès
+                delete client.activeGuesses[message.author.id]; // ✅ supprimer seulement après le succès
             });
         });
     });
 });
+
 
 
 client.login(process.env.DISCORD_TOKEN);
