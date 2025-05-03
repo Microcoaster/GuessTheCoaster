@@ -28,6 +28,19 @@ module.exports = {
         const difficulty = interaction.options.getString('difficulty').toLowerCase();
         const imageUrl = interaction.options.getString('image');
 
+        //Check URL validity
+        try {
+            const url = new URL(imageUrl);
+            if (!["http:", "https:"].includes(url.protocol)) {
+                throw new Error();
+            }
+        } catch {
+            return interaction.reply({
+                content: "Invalid image URL. Please provide a valid link starting with http:// or https://.",
+                ephemeral: true
+            });
+        }
+
         // 1. Check contributor status
         client.db.query(`SELECT contributor FROM users WHERE username = ?`, [username], (err, results) => {
             if (err) {
