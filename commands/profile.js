@@ -65,8 +65,9 @@ module.exports = {
                     if (completion == 100) badges += '<:100Completion:1367798366116773979> ';
                     if (best_streak >= 10) badges += '<:10Streak:1367800181709471824> ';
                     if (best_streak >= 50) badges += '<:50Streak:1367800333144821801> ';
-                    if (username.toLowerCase() === 'cybertrist') badges += '<:Owner:1367800341676167208> ';
                     if (contributor === 1) badges += '<:contributor:1367796340725383221> ';
+                    if (username.toLowerCase() === 'cybertrist') badges += '<:Owner:1367800341676167208> ';
+                    
 
                     const embed = new EmbedBuilder()
                         .setTitle(`${username}'s Profile`)
