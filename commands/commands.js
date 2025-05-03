@@ -57,10 +57,6 @@ module.exports = {
             .setColor(0x5865f2)
             .setImage(banner)
             .setTimestamp()
-            .setAuthor({
-                name: `${client.user.username}#${client.user.discriminator}`,
-                iconURL: client.user.displayAvatarURL()
-            })
             .setFooter({
                 text: interaction.user.tag,
                 iconURL: interaction.user.displayAvatarURL()
