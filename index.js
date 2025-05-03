@@ -82,6 +82,14 @@ client.on('interactionCreate', async interaction => {
 // Bot prêt
 client.once('ready', () => {
     console.log(`🤖 Bot connecté en tant que ${client.user.tag}`);
+
+    client.user.setPresence({
+        activities: [{
+            name: 'Currently stuck upside down...',
+            type: 0 // PLAYING
+        }],
+        status: 'online'
+    });
 });
 
 // Détection des bonnes réponses
