@@ -72,18 +72,18 @@ module.exports = {
 
         const globalEmbeds = [
             new EmbedBuilder()
-                .setTitle(`📌 Global Leaderboard`)
+                .setTitle(`📕 Global Leaderboard`)
                 .addFields(
-                    { name: `Top ${globalCredits.length} Credits <a:coaster:1368024213881094255>`, value: formatList(globalCredits, 'credits') },
+                    { name: `Top ${globalCredits.length} Credits 🎢`, value: formatList(globalCredits, 'credits') },
                     { name: `Top ${globalCompletion.length} Completion <:trophe:1368024238371508315>`, value: formatList(globalCompletion, 'completion') }
                 )
                 .setFooter({ text: 'Page 1/2  •  Buttons expire after 30 seconds' })
                 .setColor(0xffffff)
                 .setTimestamp(),
             new EmbedBuilder()
-                .setTitle(`📌 Global Leaderboard`)
+                .setTitle(`📕 Global Leaderboard`)
                 .addFields(
-                    { name: `Top ${globalStreak.length} Streaks <a:feu:1368024186773311498>`, value: formatList(globalStreak, 'streak') }
+                    { name: `Top ${globalStreak.length} Streaks 🔥`, value: formatList(globalStreak, 'streak') }
                 )
                 .setFooter({ text: 'Page 2/2  •  Buttons expire after 30 seconds' })
                 .setColor(0xffffff)
@@ -92,18 +92,18 @@ module.exports = {
 
         const localEmbeds = [
             new EmbedBuilder()
-                .setTitle(`🧭 Local Leaderboard`)
+                .setTitle(`📙 Local Leaderboard`)
                 .addFields(
-                    { name: `Top ${localCredits.length} Credits <a:coaster:1368024213881094255>`, value: formatList(localCredits, 'credits') },
+                    { name: `Top ${localCredits.length} Credits 🎢`, value: formatList(localCredits, 'credits') },
                     { name: `Top ${localCompletion.length} Completion <:trophe:1368024238371508315>`, value: formatList(localCompletion, 'completion') }
                 )
                 .setFooter({ text: 'Page 1/2  •  Buttons expire after 30 seconds' })
                 .setColor(0xffffff)
                 .setTimestamp(),
             new EmbedBuilder()
-                .setTitle(`🧭 Local Leaderboard`)
+                .setTitle(`📙 Local Leaderboard`)
                 .addFields(
-                    { name: `Top ${localStreak.length} Streaks <a:feu:1368024186773311498>`, value: formatList(localStreak, 'streak') },
+                    { name: `Top ${localStreak.length} Streaks 🔥`, value: formatList(localStreak, 'streak') },
                 )
                 .setFooter({ text: 'Page 2/2  •  Buttons expire after 30 seconds' })
                 .setColor(0xffffff)
