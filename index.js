@@ -103,7 +103,7 @@ client.once('ready', () => {
         client.user.setPresence({
             activities: [{
                 name: statuses[index % statuses.length],
-                type: 0
+                type: 5
             }],
             status: 'online'
         });
