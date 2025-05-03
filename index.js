@@ -26,6 +26,7 @@ const successMessages = [
 
 client.commands = new Collection();
 client.activeGuesses = {};
+client.currentCompetition = null;
 
 
 // Lecture des commandes
@@ -116,7 +117,7 @@ client.once('ready', () => {
 client.on('messageCreate', async message => {
     if (message.author.bot) return;
 
-    // 🎉 COMPÉTITION — priorité
+    // 🎉 Mode Compétition (tout le monde peut participer)
     if (client.currentCompetition && Date.now() < client.currentCompetition.timeout) {
         const guess = message.content.toLowerCase().trim();
         const validAnswers = [
@@ -148,43 +149,39 @@ client.on('messageCreate', async message => {
                         .setTitle("🏆 Competition Won!")
                         .setDescription(`**${username}** was the first to guess **${coasterName}**!`)
                         .addFields({
-                            name: '<:competition_winner:1368317089156169739> Reward',
+                            name: '<:trophe:1368024238371508315> Reward',
                             value: `+5 credits & unlocked the competition badge!`,
                             inline: true
                         });
 
                     message.channel.send({ embeds: [embed] }).then(() => {
-
-                        if (client.currentCompetition && client.currentCompetition.interval){
-                            clearInterval(client.currentCompetition.interval);
-                        }
-
-                        // Réinitialise le message de compétition
+                        // 🛠 Met à jour l'embed initial de la compétition
                         if (client.currentCompetition.message) {
                             const updatedEmbed = EmbedBuilder.from(client.currentCompetition.message.embeds[0])
-                                .setDescription(`✅ The coaster was guessed by **${username}**!\n\n🏁 Competition over!`)
+                                .setDescription(
+                                    `✅ The coaster was guessed by **${username}**!\n\n` +
+                                    '🎯 Be the **first** to guess the name of this coaster.\n' +
+                                    '<:trophe:1368024238371508315> Winner gets **+5 credits** and the **Competition Badge**!'
+                                )
                                 .setFooter({ text: '🏁 Competition over!' });
-
+                    
                             client.currentCompetition.message.edit({ embeds: [updatedEmbed] }).catch(console.error);
                         }
+                    
+                        client.currentCompetition = null;
                     });
-
-                    // 🛑 Arrête le timer si encore actif
-                    if (client.currentCompetition && client.currentCompetition.interval){
-                        clearInterval(client.currentCompetition.interval);
-                    }
-
+                    
                     client.currentCompetition = null;
                 });
             });
 
-            return; // Pas de fallback au système classique
+            return; // ✅ ne pas continuer avec le système normal
         }
 
-        return; // Mauvaise réponse → on laisse tenter à nouveau
+        return; // mauvaise réponse en compétition : rien ne se passe
     }
 
-    // 🎯 GUESS PERSONNEL
+    // 🎯 Système classique (guess personnel)
     const userGuess = client.activeGuesses[message.author.id];
     if (!userGuess || Date.now() > userGuess.timeout) {
         delete client.activeGuesses[message.author.id];
@@ -246,7 +243,7 @@ client.on('messageCreate', async message => {
                     );
 
                 message.reply({ embeds: [embed] }).catch(console.error);
-                delete client.activeGuesses[message.author.id]; // ❗️Supprimer uniquement après réussite
+                delete client.activeGuesses[message.author.id]; // ✅ supprimer seulement après le succès
             });
         });
     });
