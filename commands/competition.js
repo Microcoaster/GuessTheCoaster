@@ -29,7 +29,9 @@ module.exports = {
                 name: coaster.name,
                 alias: coaster.alias,
                 difficulty: coaster.difficulty,
-                timeout: Date.now() + seconds * 1000
+                timeout: Date.now() + 60000,
+                message: sentMessage,
+                interval: null 
             };
 
             const createEmbed = (timeDisplay) => new EmbedBuilder()

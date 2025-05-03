@@ -26,7 +26,6 @@ const successMessages = [
 
 client.commands = new Collection();
 client.activeGuesses = {};
-client.currentCompetition = null;
 
 
 // Lecture des commandes
@@ -168,7 +167,6 @@ client.on('messageCreate', async message => {
                             client.currentCompetition.message.edit({ embeds: [updatedEmbed] }).catch(console.error);
                         }
                     
-                        client.currentCompetition = null;
                     });
                     
                     client.currentCompetition = null;
