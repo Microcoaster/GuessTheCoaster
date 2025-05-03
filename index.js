@@ -158,7 +158,7 @@ client.on('messageCreate', async message => {
 
                     message.channel.send({ embeds: [embed] }).then(() => {
                         // 🛠 Met à jour l'embed initial de la compétition
-                        if (client.currentCompetition && client.currentCompetition.hasWinner) {
+                        if (client.currentCompetition && !client.currentCompetition.hasWinner) {
                             const originalEmbed = client.currentCompetition.message.embeds?.[0];
                             if (originalEmbed) {
                                 const updatedEmbed = EmbedBuilder.from(originalEmbed)
