@@ -155,7 +155,7 @@ client.on('messageCreate', async message => {
 
                     message.channel.send({ embeds: [embed] }).then(() => {
 
-                        if (client.currentCompetition.interval) {
+                        if (client.currentCompetition && client.currentCompetition.interval){
                             clearInterval(client.currentCompetition.interval);
                         }
 
@@ -170,7 +170,7 @@ client.on('messageCreate', async message => {
                     });
 
                     // 🛑 Arrête le timer si encore actif
-                    if (client.currentCompetition.interval) {
+                    if (client.currentCompetition && client.currentCompetition.interval){
                         clearInterval(client.currentCompetition.interval);
                     }
 
