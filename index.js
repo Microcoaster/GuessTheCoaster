@@ -131,6 +131,8 @@ client.on('messageCreate', async message => {
             const username = message.author.username;
             const coasterName = client.currentCompetition.name;
 
+            client.currentCompetition.hasWinner = true;
+
             client.db.query(`
                 INSERT IGNORE INTO users (username, credits, streak, best_streak, contributor, competition_winner, guild_id)
                 VALUES (?, 0, 0, 0, 0, 0, ?)
@@ -156,7 +158,7 @@ client.on('messageCreate', async message => {
 
                     message.channel.send({ embeds: [embed] }).then(() => {
                         // 🛠 Met à jour l'embed initial de la compétition
-                        if (client.currentCompetition && client.currentCompetition.message) {
+                        if (client.currentCompetition && !client.currentCompetition.hasWinner) {
                             const originalEmbed = client.currentCompetition.message.embeds?.[0];
                             if (originalEmbed) {
                                 const updatedEmbed = EmbedBuilder.from(originalEmbed)

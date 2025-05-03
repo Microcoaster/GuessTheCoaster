@@ -45,7 +45,8 @@ module.exports = {
                 difficulty: coaster.difficulty,
                 timeout: Date.now() + seconds * 1000,
                 interval: null,
-                message: null // valeur temporaire
+                message: null,// valeur temporaire
+                hasWinner: false
               };
               
               const sent = await interaction.reply({ embeds: [createEmbed(`⏱️ Time left: **${timeLeft}s**`)] });
