@@ -98,8 +98,19 @@ client.on('messageCreate', async message => {
     ].filter(Boolean);
 
     const isCorrect = validAnswers.some(answer => guess.includes(answer));
-    if (!isCorrect) return;
 
+    if (!isCorrect) {
+        // Réinitialise le streak si l'utilisateur s'est trompé
+        client.db.query(`
+            UPDATE users
+            SET streak = 0
+            WHERE username = ?
+        `, [username], (err) => {
+            if (err) console.error(err);
+        });
+        return;
+    }
+    
     const username = message.author.username;
     const coasterName = userGuess.name;
     const difficulty = userGuess.difficulty?.toLowerCase() || "easy";
