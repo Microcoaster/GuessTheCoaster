@@ -15,7 +15,7 @@ module.exports = {
                 `<:10Streak:1367800181709471824> - ***Streak of 10**: Obtain a streak of 10.*\n\n` +
                 `<:50Streak:1367800333144821801> - ***Streak of 50**: Obtain a streak of 50.*\n\n` +
                 `<:Owner:1367800341676167208> - ***Owner**: Own the bot. (*You can’t have this haha*)*\n\n`+
-                ` **More badges coming soon... once the dev stops riding coasters and working on microcoaster launch systems!***\n\n` 
+                `***More badges coming soon... once the dev stops riding coasters and working on microcoaster launch systems!***\n\n` 
             )
             .setColor(0xf1c40f)
             .setImage('https://cdn.discordapp.com/attachments/1367776168673280090/1367784784939585576/0815gaspa.png?ex=6815d858&is=681486d8&hm=f014d09e9d827577ae44f0fe6c80534a939353cc41f02b7fc48a3da1e1cd0d13&') // ou ton image
