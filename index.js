@@ -117,7 +117,10 @@ client.on('messageCreate', async message => {
     if (message.author.bot || !client.activeGuesses[message.author.id]) return;
 
     const userGuess = client.activeGuesses[message.author.id];
-    if (!userGuess || Date.now() > userGuess.timeout) return;
+    if (!userGuess || Date.now() > userGuess.timeout) {
+        delete client.activeGuesses[message.author.id];
+        return;
+    }
 
     const guess = message.content.toLowerCase().trim();
     const validAnswers = [
@@ -126,7 +129,7 @@ client.on('messageCreate', async message => {
     ].filter(Boolean);
 
     const isCorrect = validAnswers.some(answer => guess.includes(answer));
-    
+
     const username = message.author.username;
     const coasterName = userGuess.name;
     const difficulty = userGuess.difficulty?.toLowerCase() || "easy";
@@ -134,72 +137,61 @@ client.on('messageCreate', async message => {
     let creditGain = 1;
     if (difficulty === "medium") creditGain = 2;
     else if (difficulty === "hard") creditGain = 3;
-    
 
-    // Insérer dans user_coasters si non déjà présent
+    if (!isCorrect) {
+        client.db.query(`
+            UPDATE users SET streak = 0 WHERE username = ?
+        `, [username], (err) => {
+            if (err) console.error(err);
+            delete client.activeGuesses[message.author.id]; // Supprimer après traitement
+        });
+        return;
+    }
+
+    // Process full win flow
     client.db.query(`
         INSERT IGNORE INTO user_coasters (username, coaster_id)
         SELECT ?, id FROM coasters WHERE LOWER(name) = ? OR LOWER(alias) = ?
-    `, [username, coasterName.toLowerCase(), coasterName.toLowerCase()]);
-
-    // Étape 1 : créer un utilisateur si non existant
-    client.db.query(`
-        INSERT IGNORE INTO users (username, credits, streak, best_streak, guild_id)
-        VALUES (?, 0, 0, 0, ?)
-    `, [username, message.guildId], (err) => {
-        if (err) return console.error(err);
-
-        if (!isCorrect) {
-            // Réinitialise le streak si l'utilisateur s'est trompé
-            client.db.query(`
-                UPDATE users
-                SET streak = 0
-                WHERE username = ?
-            `, [username], (err) => {
-                if (err) console.error(err);
-            });
-            return;
-        }
-
-        // Étape 2 : incrémenter streak et crédits
+    `, [username, coasterName.toLowerCase(), coasterName.toLowerCase()], () => {
         client.db.query(`
-            UPDATE users
-            SET 
-                credits = credits + ?,
-                streak = streak + 1,
-                last_played = NOW()
-            WHERE username = ?
-        `, [creditGain, username], (err) => {
+            INSERT IGNORE INTO users (username, credits, streak, best_streak, guild_id)
+            VALUES (?, 0, 0, 0, ?)
+        `, [username, message.guildId], (err) => {
             if (err) return console.error(err);
 
-            // Étape 3 : vérifier et mettre à jour best_streak si nécessaire
-            client.db.query(`SELECT credits, streak, best_streak FROM users WHERE username = ?`, [username], (err, rows) => {
-                if (err || rows.length === 0) return;
+            client.db.query(`
+                UPDATE users
+                SET credits = credits + ?, streak = streak + 1, last_played = NOW()
+                WHERE username = ?
+            `, [creditGain, username], (err) => {
+                if (err) return console.error(err);
 
-                const { credits, streak, best_streak } = rows[0];
+                client.db.query(`
+                    SELECT credits, streak, best_streak FROM users WHERE username = ?
+                `, [username], (err, rows) => {
+                    if (err || rows.length === 0) return;
 
-                if (streak > best_streak) {
-                    client.db.query(`UPDATE users SET best_streak = ? WHERE username = ?`, [streak, username]);
-                }
+                    const { credits, streak, best_streak } = rows[0];
+                    if (streak > best_streak) {
+                        client.db.query(`UPDATE users SET best_streak = ? WHERE username = ?`, [streak, username]);
+                    }
 
-                const randomMessage = successMessages[Math.floor(Math.random() * successMessages.length)];
+                    const randomMessage = successMessages[Math.floor(Math.random() * successMessages.length)];
+                    const embed = new EmbedBuilder()
+                        .setColor(0x2ecc71)
+                        .setTitle(randomMessage)
+                        .setDescription(`**${username}** guessed "**${coasterName}**" correctly!`)
+                        .addFields(
+                            { name: '<a:Medaille:1367883558839914516> Crédit(s)', value: `+${creditGain}`, inline: true },
+                            { name: '🔥 Streak', value: `${streak}`, inline: true }
+                        );
 
-                const embed = new EmbedBuilder()
-                    .setColor(0x2ecc71)
-                    .setTitle(randomMessage)
-                    .setDescription(`**${username}** guessed "**${coasterName}**" correctly!`)
-                    .addFields(
-                        { name: '<a:Medaille:1367883558839914516> Crédit(s)', value: `+${creditGain}`, inline: true },
-                        { name: '🔥 Streak', value: `${streak}`, inline: true }
-                    );
-
-                message.reply({ embeds: [embed] });
+                    message.reply({ embeds: [embed] }).catch(console.error);
+                    delete client.activeGuesses[message.author.id]; // ✅ Supprimer après tout
+                });
             });
         });
     });
-
-    delete client.activeGuesses[message.author.id];
-
 });
 
 client.login(process.env.DISCORD_TOKEN);
