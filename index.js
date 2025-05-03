@@ -130,6 +130,12 @@ client.on('messageCreate', async message => {
 
     const isCorrect = validAnswers.some(answer => guess.includes(answer));
 
+    if (!isCorrect) {
+        // ❌ Mauvaise réponse → ne rien faire, laisser le joueur retenter
+        return;
+    }
+
+    // ✅ Bonne réponse
     const username = message.author.username;
     const coasterName = userGuess.name;
     const difficulty = userGuess.difficulty?.toLowerCase() || "easy";
@@ -138,60 +144,56 @@ client.on('messageCreate', async message => {
     if (difficulty === "medium") creditGain = 2;
     else if (difficulty === "hard") creditGain = 3;
 
-    if (!isCorrect) {
-        client.db.query(`
-            UPDATE users SET streak = 0 WHERE username = ?
-        `, [username], (err) => {
-            if (err) console.error(err);
-            delete client.activeGuesses[message.author.id]; // Supprimer après traitement
-        });
-        return;
-    }
-
-    // Process full win flow
+    // Enregistrer le coaster collecté
     client.db.query(`
         INSERT IGNORE INTO user_coasters (username, coaster_id)
         SELECT ?, id FROM coasters WHERE LOWER(name) = ? OR LOWER(alias) = ?
-    `, [username, coasterName.toLowerCase(), coasterName.toLowerCase()], () => {
+    `, [username, coasterName.toLowerCase(), coasterName.toLowerCase()]);
+
+    // S'assurer que l'utilisateur existe
+    client.db.query(`
+        INSERT IGNORE INTO users (username, credits, streak, best_streak, guild_id)
+        VALUES (?, 0, 0, 0, ?)
+    `, [username, message.guildId], err => {
+        if (err) return console.error(err);
+
+        // Incrémenter crédits et streak
         client.db.query(`
-            INSERT IGNORE INTO users (username, credits, streak, best_streak, guild_id)
-            VALUES (?, 0, 0, 0, ?)
-        `, [username, message.guildId], (err) => {
+            UPDATE users
+            SET credits = credits + ?, streak = streak + 1, last_played = NOW()
+            WHERE username = ?
+        `, [creditGain, username], err => {
             if (err) return console.error(err);
 
             client.db.query(`
-                UPDATE users
-                SET credits = credits + ?, streak = streak + 1, last_played = NOW()
-                WHERE username = ?
-            `, [creditGain, username], (err) => {
-                if (err) return console.error(err);
+                SELECT credits, streak, best_streak FROM users WHERE username = ?
+            `, [username], (err, rows) => {
+                if (err || rows.length === 0) return;
 
-                client.db.query(`
-                    SELECT credits, streak, best_streak FROM users WHERE username = ?
-                `, [username], (err, rows) => {
-                    if (err || rows.length === 0) return;
+                const { credits, streak, best_streak } = rows[0];
 
-                    const { credits, streak, best_streak } = rows[0];
-                    if (streak > best_streak) {
-                        client.db.query(`UPDATE users SET best_streak = ? WHERE username = ?`, [streak, username]);
-                    }
+                // Mettre à jour le best_streak si nécessaire
+                if (streak > best_streak) {
+                    client.db.query(`UPDATE users SET best_streak = ? WHERE username = ?`, [streak, username]);
+                }
 
-                    const randomMessage = successMessages[Math.floor(Math.random() * successMessages.length)];
-                    const embed = new EmbedBuilder()
-                        .setColor(0x2ecc71)
-                        .setTitle(randomMessage)
-                        .setDescription(`**${username}** guessed "**${coasterName}**" correctly!`)
-                        .addFields(
-                            { name: '<a:Medaille:1367883558839914516> Crédit(s)', value: `+${creditGain}`, inline: true },
-                            { name: '🔥 Streak', value: `${streak}`, inline: true }
-                        );
+                const randomMessage = successMessages[Math.floor(Math.random() * successMessages.length)];
 
-                    message.reply({ embeds: [embed] }).catch(console.error);
-                    delete client.activeGuesses[message.author.id]; // ✅ Supprimer après tout
-                });
+                const embed = new EmbedBuilder()
+                    .setColor(0x2ecc71)
+                    .setTitle(randomMessage)
+                    .setDescription(`**${username}** guessed "**${coasterName}**" correctly!`)
+                    .addFields(
+                        { name: '<a:Medaille:1367883558839914516> Crédit(s)', value: `+${creditGain}`, inline: true },
+                        { name: '🔥 Streak', value: `${streak}`, inline: true }
+                    );
+
+                message.reply({ embeds: [embed] }).catch(console.error);
+                delete client.activeGuesses[message.author.id]; // ✅ Ne supprimer qu'après succès
             });
         });
     });
 });
+
 
 client.login(process.env.DISCORD_TOKEN);
