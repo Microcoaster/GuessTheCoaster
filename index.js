@@ -11,6 +11,20 @@ const client = new Client({
     ]
 });
 
+const successMessages = [
+    "🎯 Spot on! Great job! 🚀",
+    "🌟 Nailed it! Well done! 🎉",
+    "🌀 You crushed it! Let’s go! 🎢",
+    "💡 Bingo! You're on fire! 🔥",
+    "🎯 Direct hit! Impressive guess! 🧠",
+    "🚀 Sky high! That was fast! ✨",
+    "🏁 You nailed that turn! GG! 🏎️",
+    "🌈 Perfect match! Well played! 🧩",
+    "💥 Bullseye! Right on track! 🎯",
+    "🤩 Legendary guess! You're unstoppable! 🌟"
+];
+
+
 client.commands = new Collection();
 client.activeGuesses = {}; // Pour suivre les guesses en cours
 
@@ -113,12 +127,13 @@ client.on('messageCreate', async message => {
             [username],
             (err, rows) => {
                 if (err || rows.length === 0) return;
-    
+                
+                const randomMessage = successMessages[Math.floor(Math.random() * successMessages.length)];
                 const { credits, streak, best_streak } = rows[0];
     
                 const embed = new EmbedBuilder()
                     .setColor(0x2ecc71)
-                    .setTitle('GG!')
+                    .setTitle(randomMessage)
                     .setDescription(`**${username}** guessed "**${coasterName}**" correctly!`)
                     .addFields(
                         { name: '<a:Medaille:1367883558839914516> Crédit(s)', value: '+1', inline: true },
