@@ -25,15 +25,6 @@ module.exports = {
             const coaster = results[0];
             const seconds = 60;
 
-            client.currentCompetition = {
-                name: coaster.name,
-                alias: coaster.alias,
-                difficulty: coaster.difficulty,
-                timeout: Date.now() + 60000,
-                message: sentMessage,
-                interval: null 
-            };
-
             const createEmbed = (timeDisplay) => new EmbedBuilder()
                 .setTitle('Competition Time!')
                 .setDescription(
@@ -49,6 +40,14 @@ module.exports = {
             let timeLeft = seconds;
             interaction.reply({ embeds: [createEmbed(`⏱️ Time left: **${timeLeft}s**`)] }).then(sent => {
                 client.currentCompetition.message = sent;
+                client.currentCompetition = {
+                    name: coaster.name,
+                    alias: coaster.alias,
+                    difficulty: coaster.difficulty,
+                    timeout: Date.now() + 60000,
+                    message: sentMessage,
+                    interval: null 
+                };
             });
             
 
