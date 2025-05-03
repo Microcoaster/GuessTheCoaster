@@ -74,7 +74,7 @@ module.exports = {
                 new EmbedBuilder()
                     .setTitle(`${scope === 'Global' ? '📕' : '📘'} ${scope} Leaderboard`)
                     .addFields(
-                        { name: `Top ${credits.length} Credits 🎢`, value: formatList(credits, 'credits') },
+                        { name: `Top ${credits.length} Credits ✨`, value: formatList(credits, 'credits') },
                         { name: `Top ${completion.length} Completion <:trophe:1368024238371508315>`, value: formatList(completion, 'completion') }
                     )
                     .setFooter({ text: 'Page 1/2  •  Buttons expire after 30 seconds' })
