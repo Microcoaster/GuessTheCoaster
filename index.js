@@ -116,7 +116,7 @@ client.once('ready', () => {
 client.on('messageCreate', async message => {
     if (message.author.bot) return;
 
-    // 🎉 Mode Compétition (tout le monde peut participer)
+    // 🎉 COMPÉTITION — priorité
     if (client.currentCompetition && Date.now() < client.currentCompetition.timeout) {
         const guess = message.content.toLowerCase().trim();
         const validAnswers = [
@@ -154,32 +154,31 @@ client.on('messageCreate', async message => {
                         });
 
                     message.channel.send({ embeds: [embed] }).then(() => {
-                        // 🛠 Met à jour l'embed initial de la compétition
                         if (client.currentCompetition.message) {
                             const updatedEmbed = EmbedBuilder.from(client.currentCompetition.message.embeds[0])
-                                .setDescription(
-                                    `✅ The coaster was guessed by **${username}**!\n\n` +
-                                    '🎯 Be the **first** to guess the name of this coaster.\n' +
-                                    '<:trophe:1368024238371508315> Winner gets **+5 credits** and the **Competition Badge**!'
-                                )
+                                .setDescription(`✅ The coaster was guessed by **${username}**!\n\n🏁 Competition over!`)
                                 .setFooter({ text: '🏁 Competition over!' });
-                    
+
                             client.currentCompetition.message.edit({ embeds: [updatedEmbed] }).catch(console.error);
                         }
-                    
                     });
-                    
+
+                    // 🛑 Arrête le timer si encore actif
+                    if (client.currentCompetition.interval) {
+                        clearInterval(client.currentCompetition.interval);
+                    }
+
                     client.currentCompetition = null;
                 });
             });
 
-            return; // ✅ ne pas continuer avec le système normal
+            return; // Pas de fallback au système classique
         }
 
-        return; // mauvaise réponse en compétition : rien ne se passe
+        return; // Mauvaise réponse → on laisse tenter à nouveau
     }
 
-    // 🎯 Système classique (guess personnel)
+    // 🎯 GUESS PERSONNEL
     const userGuess = client.activeGuesses[message.author.id];
     if (!userGuess || Date.now() > userGuess.timeout) {
         delete client.activeGuesses[message.author.id];
@@ -241,7 +240,7 @@ client.on('messageCreate', async message => {
                     );
 
                 message.reply({ embeds: [embed] }).catch(console.error);
-                delete client.activeGuesses[message.author.id]; // ✅ supprimer seulement après le succès
+                delete client.activeGuesses[message.author.id]; // ❗️Supprimer uniquement après réussite
             });
         });
     });
