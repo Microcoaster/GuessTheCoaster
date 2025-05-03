@@ -97,14 +97,14 @@ client.on('messageCreate', async message => {
     
 
     client.db.query(`
-        INSERT INTO users (username, credits, streak, best_streak)
-        VALUES (?, 1, 1, 1)
+        INSERT INTO users (username, credits, streak, best_streak, guild_id)
+        VALUES (?, 1, 1, 1, ?)
         ON DUPLICATE KEY UPDATE 
             credits = credits + 1, 
             streak = streak + 1,
             best_streak = GREATEST(best_streak, streak),
             last_played = NOW()
-    `, [username], err => {    
+    `, [username, message.guildId], err => {    
         if (err) return console.error(err);
     
         client.db.query(`SELECT credits, streak, best_streak FROM users WHERE username = ?`, [username], (err, rows) => {
