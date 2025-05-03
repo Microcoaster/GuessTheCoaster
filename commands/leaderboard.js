@@ -95,7 +95,7 @@ module.exports = {
             const backId = scope === 'Global' ? 'global1' : 'local1';
             const forwardId = scope === 'Global' ? 'global2' : 'local2';
             const switchId = scope === 'Global' ? 'local' : 'global';
-            const color = scope === 'Global' ? #dd2e44 : #55acee;
+            const color = scope === 'Global' ? 0xdd2e44 : 0x55acee;
 
             const buttons = new ActionRowBuilder().addComponents(
                 new ButtonBuilder().setCustomId(backId).setLabel('←').setStyle(1).setDisabled(page === 1),
