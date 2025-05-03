@@ -85,13 +85,16 @@ client.once('ready', () => {
 
     
     const statuses = [
-        "🎢 On a wild ride!",
-        "🌳 Guess the coaster!",
-        "🎯 Will you get it right?",
-        "🧩 Try to solve the mystery!",
-        "🏁 Ride loading... hold tight!",
-        "✨ From zero to 120km/h!"
+        "🎢 Guess the coaster",
+        "🧠 Challenging your coaster knowledge",
+        "⏱️ Name that ride before time runs out",
+        "💯 Analyzing launch speed and track layout",
+        "⏳ You're on the clock. Ready?",
+        "✨ Decoding coaster clues",
+        "🚀 From zero to 120km/h!",
+        "🌀 Ride loading... hold tight!"
     ];
+    
 
     let index = 0;
 
