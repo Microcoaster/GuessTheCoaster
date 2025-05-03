@@ -8,7 +8,7 @@ module.exports = {
     async execute(interaction, client) {
         const guildId = interaction.guildId;
 
-        // 🔄 Récupération du nombre total de coasters
+        // Récupération du nombre total de coasters
         const totalCoasters = await new Promise((resolve) => {
             client.db.query(`SELECT COUNT(*) as total FROM coasters`, (err, res) => {
                 if (err) return resolve(0);
@@ -16,7 +16,7 @@ module.exports = {
             });
         });
 
-        // 🔍 Fonctions SQL pour récupérer les données
+        // Fonctions SQL pour récupérer les données
         const fetchData = (query, params = []) => {
             return new Promise((resolve) => {
                 client.db.query(query, params, (err, rows) => {
@@ -58,7 +58,7 @@ module.exports = {
             SELECT username, best_streak FROM users 
             WHERE guild_id = ? ORDER BY best_streak DESC LIMIT 10`, [guildId]);
 
-        // ⬇️ Formatage des textes
+        // ⬇Formatage des textes
         const formatList = (list, label) => {
             return list.map((row, i) => {
                 let value = row.credits || row.best_streak || row.collected || 0;
@@ -92,7 +92,7 @@ module.exports = {
 
         const localEmbeds = [
             new EmbedBuilder()
-                .setTitle(`📙 Local Leaderboard`)
+                .setTitle(`📘 Local Leaderboard`)
                 .addFields(
                     { name: `Top ${localCredits.length} Credits 🎢`, value: formatList(localCredits, 'credits') },
                     { name: `Top ${localCompletion.length} Completion <:trophe:1368024238371508315>`, value: formatList(localCompletion, 'completion') }
@@ -101,7 +101,7 @@ module.exports = {
                 .setColor(0xffffff)
                 .setTimestamp(),
             new EmbedBuilder()
-                .setTitle(`📙 Local Leaderboard`)
+                .setTitle(`📘 Local Leaderboard`)
                 .addFields(
                     { name: `Top ${localStreak.length} Streaks 🔥`, value: formatList(localStreak, 'streak') },
                 )
@@ -110,7 +110,7 @@ module.exports = {
                 .setTimestamp()
         ];
 
-        // ⬇️ Boutons
+        //  Boutons
         const makeButtons = (scope = 'Global', page = 1) => {
             const backId = scope === 'Global' ? 'global1' : 'local1';
             const forwardId = scope === 'Global' ? 'global2' : 'local2';
@@ -122,7 +122,7 @@ module.exports = {
             );
         };
 
-        // ⬇️ Réponse initiale
+        //  Réponse initiale
         const reply = await interaction.reply({
             embeds: [globalEmbeds[0]],
             components: [makeButtons('Global', 1)]
