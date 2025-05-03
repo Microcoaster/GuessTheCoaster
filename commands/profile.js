@@ -66,7 +66,7 @@ module.exports = {
                     if (best_streak >= 10) badges += '<:10Streak:1367800181709471824> ';
                     if (best_streak >= 50) badges += '<:50Streak:1367800333144821801> ';
                     if (contributor === 1) badges += '<:contributor:1367796340725383221> ';
-                    if (competition_winner === 1) badges += '<:trophe:1368024238371508315>';
+                    if (competition_winner === 1) badges += '<:competition_winner:1368317089156169739>';
                     if (username.toLowerCase() === 'cybertrist') badges += '<:Owner:1367800341676167208> ';
                     
 

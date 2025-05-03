@@ -148,7 +148,7 @@ client.on('messageCreate', async message => {
                         .setTitle("🏆 Competition Won!")
                         .setDescription(`**${username}** was the first to guess **${coasterName}**!`)
                         .addFields({
-                            name: '<:trophe:1368024238371508315> Reward',
+                            name: '<:competition_winner:1368317089156169739> Reward',
                             value: `+5 credits & unlocked the competition badge!`,
                             inline: true
                         });

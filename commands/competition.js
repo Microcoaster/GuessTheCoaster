@@ -31,7 +31,7 @@ module.exports = {
                 .setDescription(
                     'A public guessing round has started!\n\n' +
                     '🎯 Be the **first** to guess the name of this coaster.\n' +
-                    '<:trophe:1368024238371508315> Winner gets **+5 credits** and the **Competition Badge**!\n\n' +
+                    '<:competition_winner:1368317089156169739> Winner gets **+5 credits** and the **Competition Badge**!\n\n' +
                     timeDisplay
                 )
                 .setImage(coaster.image_url)
