@@ -6,47 +6,70 @@ module.exports = {
         .setDescription('Start a public guessing round — first to guess wins +5 credits and a badge!'),
 
     async execute(interaction, client) {
-        // Vérifie si une compétition est déjà en cours
         if (client.currentCompetition && Date.now() < client.currentCompetition.timeout) {
             return interaction.reply({
-                content: '🚨 A competition is already in progress!',
+                content: 'A competition is already in progress!',
                 ephemeral: true
             });
         }
 
-        // Sélectionne un coaster au hasard
         client.db.query(`SELECT * FROM coasters ORDER BY RAND() LIMIT 1`, (err, results) => {
             if (err || results.length === 0) {
                 console.error(err);
                 return interaction.reply({
-                    content: '❌ Failed to fetch a coaster from the database.',
+                    content: 'Failed to fetch a coaster from the database.',
                     ephemeral: true
                 });
             }
 
             const coaster = results[0];
+            const seconds = 60;
 
-            // Définit la compétition active pour 60 secondes
             client.currentCompetition = {
                 name: coaster.name,
                 alias: coaster.alias,
                 difficulty: coaster.difficulty,
-                timeout: Date.now() + 60000 // 1 min
+                timeout: Date.now() + seconds * 1000
             };
 
-            // Envoie l'embed d'annonce
-            const embed = new EmbedBuilder()
-                .setTitle('🏁 Competition Time!')
+            const createEmbed = (timeDisplay) => new EmbedBuilder()
+                .setTitle('Competition Time!')
                 .setDescription(
                     'A public guessing round has started!\n\n' +
-                    '🎯 Be the **first** to guess the name of this coaster.\n' +
-                    '<:trophe:1368024238371508315> Winner gets **+5 credits** and the **Competition Badge**!'
+                    'Be the **first** to guess the name of this coaster.\n' +
+                    '<:trophe:1368024238371508315> Winner gets **+5 credits** and the **Competition Badge**!\n\n' +
+                    timeDisplay
                 )
                 .setImage(coaster.image_url)
                 .setColor(0xe67e22)
-                .setFooter({ text: 'You have 60 seconds. Type your guess now!' });
+                .setFooter({ text: 'Type your guess now!' });
 
-            interaction.reply({ embeds: [embed] });
+            let timeLeft = seconds;
+            interaction.reply({ embeds: [createEmbed(`Time left: **${timeLeft}s**`)] });
+
+            const interval = setInterval(() => {
+                timeLeft--;
+
+                if (!client.currentCompetition || Date.now() > client.currentCompetition.timeout) {
+                    clearInterval(interval);
+                    return;
+                }
+
+                interaction.editReply({ embeds: [createEmbed(`⏱️ Time left: **${timeLeft}s**`)] });
+            }, 1000);
+
+            setTimeout(() => {
+                if (client.currentCompetition && Date.now() > client.currentCompetition.timeout) {
+                    client.currentCompetition = null;
+
+                    const timeoutEmbed = new EmbedBuilder()
+                        .setTitle("Time's Up!")
+                        .setDescription("No one guessed the coaster in time.")
+                        .setColor(0xd9534f);
+
+                    interaction.followUp({ embeds: [timeoutEmbed] });
+                }
+            }, seconds * 1000);
         });
     }
 };
