@@ -67,7 +67,9 @@ module.exports = {
                 `**/commands** – *displays this help message.*\n\n` +
                 `**/guess** – *start a guessing round based on coaster images.*\n\n` +
                 `**/leaderboard** – *view the global leaderboard.*\n\n` +
-                `**/profile** – *view the profile of a player.*`
+                `**/profile** – *view the profile of a player.*\n\n`+
+                `**/competition** – *start a public guessing round — fastest guess wins!*\n\n` +
+                `**/endgame** – *cancel the current guessing round if needed.*\n\n`
             );
 
         await interaction.reply({ embeds: [embed], ephemeral: true });
