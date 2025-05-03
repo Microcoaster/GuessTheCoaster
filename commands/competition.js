@@ -38,44 +38,41 @@ module.exports = {
                 .setColor(0xe67e22)
                 .setFooter({ text: 'Type your guess now!' });
 
-            const reply = await interaction.reply({ embeds: [createEmbed(`⏱️ Time left: **${timeLeft}s**`)] });
+            const sent = await interaction.reply({ embeds: [createEmbed(`⏱️ Time left: **${timeLeft}s**`)] });
 
-            // Initialise l'objet après avoir le message
             client.currentCompetition = {
                 name: coaster.name,
                 alias: coaster.alias,
                 difficulty: coaster.difficulty,
                 timeout: Date.now() + seconds * 1000,
-                message: reply,
+                message: await interaction.fetchReply(),
                 interval: null
             };
 
-            // ⏱️ Met à jour l’embed toutes les secondes
+            // Timer dynamique
             const interval = setInterval(() => {
-                timeLeft--;
+                if (!client.currentCompetition) return clearInterval(interval);
 
-                if (!client.currentCompetition || Date.now() > client.currentCompetition.timeout) {
+                timeLeft--;
+                if (timeLeft <= 0 || Date.now() > client.currentCompetition.timeout) {
                     clearInterval(interval);
                     return;
                 }
 
-                reply.edit({ embeds: [createEmbed(`⏱️ Time left: **${timeLeft}s**`)] }).catch(() => {});
+                interaction.editReply({ embeds: [createEmbed(`⏱️ Time left: **${timeLeft}s**`)] }).catch(console.error);
             }, 1000);
 
-            client.currentCompetition.interval = interval;
-
-            // ⌛ Timeout final
+            // Fin du round après 60s
             setTimeout(() => {
                 if (client.currentCompetition && Date.now() > client.currentCompetition.timeout) {
-                    clearInterval(client.currentCompetition.interval);
                     client.currentCompetition = null;
 
                     const timeoutEmbed = new EmbedBuilder()
                         .setTitle("⏱️ Time's Up!")
-                        .setDescription("Nobody guessed the coaster in time.")
+                        .setDescription("No one guessed the coaster in time.")
                         .setColor(0xd9534f);
 
-                    interaction.followUp({ embeds: [timeoutEmbed] }).catch(() => {});
+                    interaction.followUp({ embeds: [timeoutEmbed] });
                 }
             }, seconds * 1000);
         });
