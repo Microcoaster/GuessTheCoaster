@@ -2,7 +2,7 @@
 
 **GuessTheCoaster** is a community-driven Discord bot where users guess the names of roller coasters based on images. Collect coasters, earn credits, build your streak, and climb the leaderboard. If you love theme parks and quizzes, you're in the right place!
 
-![Banner](https://media.discordapp.net/attachments/...)
+![Banner](https://watkin81.github.io/images/header/Manta_SWSD.jpg)
 
 ## 🚀 Features
 
@@ -54,12 +54,12 @@
 
 2. Create a `.env` file with:
 
-    DISCORD_TOKEN=your_token
-    CLIENT_ID=your_bot_id
-    DB_HOST=localhost
-    DB_USER=root
-    DB_PASS=your_password
-    DB_NAME=your_db
+DISCORD_TOKEN=your_token  
+CLIENT_ID=your_bot_id  
+DB_HOST=localhost  
+DB_USER=root  
+DB_PASS=your_password  
+DB_NAME=your_db
 
 3. Install dependencies:
 
