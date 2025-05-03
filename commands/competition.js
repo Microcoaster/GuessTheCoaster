@@ -38,16 +38,19 @@ module.exports = {
                 .setColor(0xe67e22)
                 .setFooter({ text: 'Type your guess now!' });
 
-            const sent = await interaction.reply({ embeds: [createEmbed(`⏱️ Time left: **${timeLeft}s**`)] });
 
             client.currentCompetition = {
                 name: coaster.name,
                 alias: coaster.alias,
                 difficulty: coaster.difficulty,
                 timeout: Date.now() + seconds * 1000,
-                message: await interaction.fetchReply(),
-                interval: null
-            };
+                interval: null,
+                message: null // valeur temporaire
+              };
+              
+              const sent = await interaction.reply({ embeds: [createEmbed(`⏱️ Time left: **${timeLeft}s**`)] });
+              client.currentCompetition.message = await interaction.fetchReply();
+              
 
             // Timer dynamique
             const interval = setInterval(() => {
