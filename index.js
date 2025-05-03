@@ -33,7 +33,7 @@ const db = mysql.createConnection({
 });
 db.connect(err => {
     if (err) throw err;
-    console.log('✅ Connecté à MySQL');
+    console.log('Connecté à MySQL');
 });
 client.db = db;
 
@@ -41,14 +41,14 @@ client.db = db;
 const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
 (async () => {
     try {
-        console.log('📡 Déploiement global des commandes slash...');
+        console.log('Déploiement global des commandes slash...');
         await rest.put(
             Routes.applicationCommands(process.env.CLIENT_ID),
             { body: commandsData }
         );
-        console.log('✅ Commandes slash enregistrées globalement !');
+        console.log('Commandes slash enregistrées globalement !');
     } catch (error) {
-        console.error('❌ Erreur lors du déploiement des commandes :', error);
+        console.error('Erreur lors du déploiement des commandes :', error);
     }
 })();
 
@@ -62,7 +62,7 @@ client.on('interactionCreate', async interaction => {
         await command.execute(interaction, client);
     } catch (error) {
         console.error(error);
-        await interaction.reply({ content: '❌ Erreur lors de l’exécution de la commande.', ephemeral: true });
+        await interaction.reply({ content: 'Erreur lors de l\’exécution de la commande.', ephemeral: true });
     }
 });
 
@@ -121,7 +121,7 @@ client.on('messageCreate', async message => {
                     .setTitle('GG!')
                     .setDescription(`**${username}** guessed "**${coasterName}**" correctly!`)
                     .addFields(
-                        { name: '🏅 Crédit(s)', value: '+1', inline: true },
+                        { name: '<a:Medaille:1367883558839914516> Crédit(s)', value: '+1', inline: true },
                         { name: '🔥 Streak', value: `${streak}`, inline: true }
                     );
     

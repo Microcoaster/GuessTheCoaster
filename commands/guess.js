@@ -27,7 +27,7 @@ module.exports = {
 
         client.db.query(sql, params, async (err, results) => {
             if (err || results.length === 0) {
-                return interaction.reply({ content: '❌ No coaster found for that difficulty.', ephemeral: true });
+                return interaction.reply({ content: 'No coaster found for that difficulty.', ephemeral: true });
             }
 
             const coaster = results[0];
@@ -35,7 +35,7 @@ module.exports = {
 
             if (client.activeGuesses && client.activeGuesses[userId]) {
                 return interaction.reply({
-                    content: '⛔ You already have a round active! Please answer it before starting a new one.',
+                    content: 'You already have a round active! Please answer it before starting a new one.',
                     ephemeral: true
                 });
             }
