@@ -48,7 +48,7 @@ module.exports = {
                         const embed1 = new EmbedBuilder()
                             .setTitle('🌐 Global Leaderboard - Page 1')
                             .addFields(
-                                { name: '🏆 Top Credits', value: creditsString },
+                                { name: '🏆🏆 Top Credits', value: creditsString },
                                 { name: '✅ Top Completion', value: completionString }
                             )
                             .setColor(0x3498db)
