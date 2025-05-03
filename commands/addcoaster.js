@@ -28,12 +28,10 @@ module.exports = {
         const difficulty = interaction.options.getString('difficulty').toLowerCase();
         const imageUrl = interaction.options.getString('image');
 
-        //Check URL validity
+        // Validate URL format
         try {
             const url = new URL(imageUrl);
-            if (!["http:", "https:"].includes(url.protocol)) {
-                throw new Error();
-            }
+            if (!["http:", "https:"].includes(url.protocol)) throw new Error();
         } catch {
             return interaction.reply({
                 content: "Invalid image URL. Please provide a valid link starting with http:// or https://.",
@@ -41,7 +39,7 @@ module.exports = {
             });
         }
 
-        // 1. Check contributor status
+        // Check contributor status
         client.db.query(`SELECT contributor FROM users WHERE username = ?`, [username], (err, results) => {
             if (err) {
                 console.error(err);
@@ -55,7 +53,7 @@ module.exports = {
                 });
             }
 
-            // 2. Check difficulty validity
+            // Validate difficulty
             if (!["easy", "medium", "hard"].includes(difficulty)) {
                 return interaction.reply({
                     content: "Invalid difficulty. Please choose from `easy`, `medium`, or `hard`.",
@@ -63,33 +61,51 @@ module.exports = {
                 });
             }
 
-            // 3. Insert into the database
             const aliasFinal = alias.toLowerCase() === "x" ? null : alias;
 
-            client.db.query(`
-                INSERT INTO coasters (name, alias, difficulty, image_url)
-                VALUES (?, ?, ?, ?)
-            `, [name, aliasFinal, difficulty, imageUrl], (err) => {
+            // Check for duplicate coaster name
+            client.db.query(`SELECT id FROM coasters WHERE name = ?`, [name], (err, existing) => {
                 if (err) {
                     console.error(err);
                     return interaction.reply({
-                        content: "An error occurred while adding the coaster.",
+                        content: "An error occurred while checking for duplicates.",
                         ephemeral: true
                     });
                 }
 
-                const embed = new EmbedBuilder()
-                    .setTitle("New Coaster Added!")
-                    .setDescription(`The coaster **${name}** was successfully added to the database.`)
-                    .addFields(
-                        { name: "Alias", value: aliasFinal || "*None*", inline: true },
-                        { name: "Difficulty", value: difficulty, inline: true }
-                    )
-                    .setImage(imageUrl)
-                    .setColor(0x00b894)
-                    .setTimestamp();
+                if (existing.length > 0) {
+                    return interaction.reply({
+                        content: `A coaster named **${name}** already exists in the database.`,
+                        ephemeral: true
+                    });
+                }
 
-                interaction.reply({ embeds: [embed] });
+                // Insert new coaster
+                client.db.query(`
+                    INSERT INTO coasters (name, alias, difficulty, image_url)
+                    VALUES (?, ?, ?, ?)
+                `, [name, aliasFinal, difficulty, imageUrl], (err) => {
+                    if (err) {
+                        console.error(err);
+                        return interaction.reply({
+                            content: "An error occurred while adding the coaster.",
+                            ephemeral: true
+                        });
+                    }
+
+                    const embed = new EmbedBuilder()
+                        .setTitle("New Coaster Added!")
+                        .setDescription(`The coaster **${name}** was successfully added to the database.`)
+                        .addFields(
+                            { name: "Alias", value: aliasFinal || "*None*", inline: true },
+                            { name: "Difficulty", value: difficulty, inline: true }
+                        )
+                        .setImage(imageUrl)
+                        .setColor(0x00b894)
+                        .setTimestamp();
+
+                    interaction.reply({ embeds: [embed] });
+                });
             });
         });
     }
