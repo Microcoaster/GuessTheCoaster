@@ -26,6 +26,8 @@ const successMessages = [
 
 client.commands = new Collection();
 client.activeGuesses = {};
+client.currentCompetition = null;
+
 
 // Lecture des commandes
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
@@ -117,6 +119,55 @@ client.on('messageCreate', async message => {
     if (message.author.bot || !client.activeGuesses[message.author.id]) return;
 
     const userGuess = client.activeGuesses[message.author.id];
+
+    // compétition
+    if (client.currentCompetition && Date.now() < client.currentCompetition.timeout) {
+        const guess = message.content.toLowerCase().trim();
+        const validAnswers = [
+            client.currentCompetition.name.toLowerCase(),
+            client.currentCompetition.alias?.toLowerCase()
+        ].filter(Boolean);
+
+        const isCorrect = validAnswers.some(answer => guess.includes(answer));
+
+        if (isCorrect) {
+            const username = message.author.username;
+            const coasterName = client.currentCompetition.name;
+
+            // Ajouter l'utilisateur s'il n'existe pas encore
+            client.db.query(`
+                INSERT IGNORE INTO users (username, credits, streak, best_streak, contributor, competition_winner, guild_id)
+                VALUES (?, 0, 0, 0, 0, 0, ?)
+            `, [username, message.guildId], (err) => {
+                if (err) return console.error(err);
+
+                // Donner les crédits et activer le badge
+                client.db.query(`
+                    UPDATE users
+                    SET credits = credits + 5,
+                        competition_winner = 1
+                    WHERE username = ?
+                `, [username], (err) => {
+                    if (err) return console.error(err);
+
+                    const embed = new EmbedBuilder()
+                        .setColor(0xf1c40f)
+                        .setTitle("🏆 Competition Won!")
+                        .setDescription(`**${username}** was the first to guess **${coasterName}**!`)
+                        .addFields({ name: '<:trophe:1368024238371508315> Reward', value: `+5 credits & unlocked the competition badge!`, inline: true });
+
+                    message.channel.send({ embeds: [embed] });
+                    client.currentCompetition = null;
+                });
+            });
+
+            return;
+        }
+    }
+
+
+
+
     if (!userGuess || Date.now() > userGuess.timeout) {
         delete client.activeGuesses[message.author.id];
         return;
