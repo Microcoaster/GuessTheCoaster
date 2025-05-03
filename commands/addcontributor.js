@@ -1,22 +1,29 @@
-const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('addcontributor')
-        .setDescription('Ajoute ou retire le statut de contributeur à un utilisateur')
+        .setDescription('Add or remove contributor status from a user')
         .addUserOption(option =>
-            option.setName('utilisateur')
-                .setDescription('L’utilisateur à modifier')
+            option.setName('user')
+                .setDescription('The user to update')
                 .setRequired(true))
         .addBooleanOption(option =>
-            option.setName('valeur')
-                .setDescription('true pour ajouter, false pour retirer')
-                .setRequired(true))
-        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
+            option.setName('value')
+                .setDescription('true to add, false to remove')
+                .setRequired(true)),
 
     async execute(interaction, client) {
-        const user = interaction.options.getUser('utilisateur');
-        const value = interaction.options.getBoolean('valeur');
+        // Only Cybertrist can use this command
+        if (interaction.user.id !== '634433284285268006') {
+            return interaction.reply({
+                content: "Only **Cybertrist** can use this command.",
+                ephemeral: true
+            });
+        }
+
+        const user = interaction.options.getUser('user');
+        const value = interaction.options.getBoolean('value');
 
         client.db.query(`
             INSERT INTO users (username, contributor)
@@ -25,12 +32,12 @@ module.exports = {
         `, [user.username, value, value], (err) => {
             if (err) {
                 console.error(err);
-                return interaction.reply({ content: "❌ Une erreur est survenue.", ephemeral: true });
+                return interaction.reply({ content: "An error occurred.", ephemeral: true });
             }
 
             const embed = new EmbedBuilder()
-                .setTitle('✅ Statut mis à jour')
-                .setDescription(`**${user.username}** est maintenant ${value ? '✅ contributeur' : '❌ non contributeur'}.`)
+                .setTitle('Contributor Status Updated')
+                .setDescription(`**${user.username}** is now marked as ${value ? 'a contributor' : 'not a contributor'}.`)
                 .setColor(value ? 0x2ecc71 : 0xe74c3c);
 
             interaction.reply({ embeds: [embed], ephemeral: true });
