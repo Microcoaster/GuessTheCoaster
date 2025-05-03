@@ -3,22 +3,22 @@ const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('addcoaster')
-        .setDescription('Ajoute un coaster à la base de données (réservé aux contributeurs)')
+        .setDescription('Adds a coaster to the database (contributors only)')
         .addStringOption(option =>
             option.setName('name')
-                .setDescription('Nom exact du coaster')
+                .setDescription('Exact name of the coaster')
                 .setRequired(true))
         .addStringOption(option =>
             option.setName('alias')
-                .setDescription('Alias ou second nom (ou "x" si aucun)')
+                .setDescription('Alias or alternate name (type "x" if none)')
                 .setRequired(true))
         .addStringOption(option =>
             option.setName('difficulty')
-                .setDescription('Difficulté : easy / medium / hard')
+                .setDescription('Difficulty: easy, medium, hard')
                 .setRequired(true))
         .addStringOption(option =>
             option.setName('image')
-                .setDescription('URL de l’image du coaster')
+                .setDescription('Image URL of the coaster')
                 .setRequired(true)),
 
     async execute(interaction, client) {
@@ -28,29 +28,29 @@ module.exports = {
         const difficulty = interaction.options.getString('difficulty').toLowerCase();
         const imageUrl = interaction.options.getString('image');
 
-        // 1. Vérifier si l'utilisateur est contributeur
+        // 1. Check contributor status
         client.db.query(`SELECT contributor FROM users WHERE username = ?`, [username], (err, results) => {
             if (err) {
                 console.error(err);
-                return interaction.reply({ content: "❌ Erreur SQL lors de la vérification du statut contributeur.", ephemeral: true });
+                return interaction.reply({ content: "SQL error while checking contributor status.", ephemeral: true });
             }
 
             if (results.length === 0 || results[0].contributor !== 1) {
                 return interaction.reply({
-                    content: "🚫 Tu n'es pas autorisé à utiliser cette commande. Seuls les contributeurs peuvent ajouter des coasters.",
+                    content: "You are not authorized to use this command. Only contributors can add coasters.",
                     ephemeral: true
                 });
             }
 
-            // 2. Vérifier que la difficulté est valide
+            // 2. Check difficulty validity
             if (!["easy", "medium", "hard"].includes(difficulty)) {
                 return interaction.reply({
-                    content: "❌ Difficulté invalide. Choisis parmi `easy`, `medium`, ou `hard`.",
+                    content: "Invalid difficulty. Please choose from `easy`, `medium`, or `hard`.",
                     ephemeral: true
                 });
             }
 
-            // 3. Insertion du coaster dans la base
+            // 3. Insert into the database
             const aliasFinal = alias.toLowerCase() === "x" ? null : alias;
 
             client.db.query(`
@@ -60,17 +60,17 @@ module.exports = {
                 if (err) {
                     console.error(err);
                     return interaction.reply({
-                        content: "❌ Une erreur est survenue lors de l'ajout du coaster.",
+                        content: "An error occurred while adding the coaster.",
                         ephemeral: true
                     });
                 }
 
                 const embed = new EmbedBuilder()
-                    .setTitle("🎢 Nouveau coaster ajouté !")
-                    .setDescription(`✅ Le coaster **${name}** a bien été ajouté à la base.`)
+                    .setTitle("New Coaster Added!")
+                    .setDescription(`The coaster **${name}** was successfully added to the database.`)
                     .addFields(
-                        { name: "Alias", value: aliasFinal || "*Aucun*", inline: true },
-                        { name: "Difficulté", value: difficulty, inline: true }
+                        { name: "Alias", value: aliasFinal || "*None*", inline: true },
+                        { name: "Difficulty", value: difficulty, inline: true }
                     )
                     .setImage(imageUrl)
                     .setColor(0x00b894)
