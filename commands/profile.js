@@ -68,6 +68,7 @@ module.exports = {
                     if (contributor === 1) badges += '<:contributor:1367796340725383221> ';
                     if (competition_winner === 1) badges += '<:competition_winner:1368317089156169739>';
                     if (username.toLowerCase() === 'cybertrist') badges += '<:Owner:1367800341676167208> ';
+                    if (credits >= 10000) badges += '<:MicroCoaster:1368326557432680559> ';
                     
 
                     const embed = new EmbedBuilder()
