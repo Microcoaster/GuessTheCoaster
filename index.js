@@ -98,18 +98,6 @@ client.on('messageCreate', async message => {
     ].filter(Boolean);
 
     const isCorrect = validAnswers.some(answer => guess.includes(answer));
-
-    if (!isCorrect) {
-        // Réinitialise le streak si l'utilisateur s'est trompé
-        client.db.query(`
-            UPDATE users
-            SET streak = 0
-            WHERE username = ?
-        `, [username], (err) => {
-            if (err) console.error(err);
-        });
-        return;
-    }
     
     const username = message.author.username;
     const coasterName = userGuess.name;
@@ -118,6 +106,7 @@ client.on('messageCreate', async message => {
     let creditGain = 1;
     if (difficulty === "medium") creditGain = 2;
     else if (difficulty === "hard") creditGain = 3;
+    
 
     // Insérer dans user_coasters si non déjà présent
     client.db.query(`
@@ -131,6 +120,18 @@ client.on('messageCreate', async message => {
         VALUES (?, 0, 0, 0, ?)
     `, [username, message.guildId], (err) => {
         if (err) return console.error(err);
+
+        if (!isCorrect) {
+            // Réinitialise le streak si l'utilisateur s'est trompé
+            client.db.query(`
+                UPDATE users
+                SET streak = 0
+                WHERE username = ?
+            `, [username], (err) => {
+                if (err) console.error(err);
+            });
+            return;
+        }
 
         // Étape 2 : incrémenter streak et crédits
         client.db.query(`
