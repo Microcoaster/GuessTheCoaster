@@ -45,7 +45,10 @@ module.exports = {
                 .setFooter({ text: 'Type your guess now!' });
 
             let timeLeft = seconds;
-            interaction.reply({ embeds: [createEmbed(`Time left: **${timeLeft}s**`)] });
+            interaction.reply({ embeds: [createEmbed(`⏱️ Time left: **${timeLeft}s**`)] }).then(sent => {
+                client.currentCompetition.message = sent;
+            });
+            
 
             const interval = setInterval(() => {
                 timeLeft--;
@@ -55,7 +58,7 @@ module.exports = {
                     return;
                 }
 
-                interaction.editReply({ embeds: [createEmbed(`⏱️ Time left: **${timeLeft}s**`)] });
+                interaction.editReply({ embeds: [createEmbed(`Time left: **${timeLeft}s**`)] });
             }, 1000);
 
             setTimeout(() => {

@@ -154,7 +154,23 @@ client.on('messageCreate', async message => {
                             inline: true
                         });
 
-                    message.channel.send({ embeds: [embed] });
+                    message.channel.send({ embeds: [embed] }).then(() => {
+                        // 🛠 Met à jour l'embed initial de la compétition
+                        if (client.currentCompetition.message) {
+                            const updatedEmbed = EmbedBuilder.from(client.currentCompetition.message.embeds[0])
+                                .setDescription(
+                                    `✅ The coaster was guessed by **${username}**!\n\n` +
+                                    '🎯 Be the **first** to guess the name of this coaster.\n' +
+                                    '<:trophe:1368024238371508315> Winner gets **+5 credits** and the **Competition Badge**!'
+                                )
+                                .setFooter({ text: '🏁 Competition over!' });
+                    
+                            client.currentCompetition.message.edit({ embeds: [updatedEmbed] }).catch(console.error);
+                        }
+                    
+                        client.currentCompetition = null;
+                    });
+                    
                     client.currentCompetition = null;
                 });
             });
