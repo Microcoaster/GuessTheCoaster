@@ -18,7 +18,7 @@ module.exports = {
                 `***More badges coming soon... once the dev stops riding coasters and working on microcoaster launch systems!***\n\n` 
             )
             .setColor(0xf1c40f)
-            .setImage('https://cdn.discordapp.com/attachments/1367776168673280090/1367784784939585576/0815gaspa.png?ex=6815d858&is=681486d8&hm=f014d09e9d827577ae44f0fe6c80534a939353cc41f02b7fc48a3da1e1cd0d13&') // ou ton image
+            .setImage('https://media.discordapp.net/attachments/1367776168673280090/1368256804756389961/0815gaspa.png?ex=68178ff3&is=68163e73&hm=61c0a3ebdd950cac325e84007616a4a84edd8b6b7189a7e449b11ff9467fbfde&=&format=webp&quality=lossless')
             .setFooter({
                 text: `${interaction.client.user.username}`,
                 iconURL: interaction.client.user.displayAvatarURL()
