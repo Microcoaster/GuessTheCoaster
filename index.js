@@ -14,7 +14,7 @@ const client = new Client({
 const successMessages = [
     "🎯 Spot on! Great job! 🚀",
     "🌟 Nailed it! Well done! 🎉",
-    "🌀 You crushed it! Let\’s go! 🎢",
+    "🌀 You crushed it! Let’s go! 🎢",
     "💡 Bingo! You're on fire! 🔥",
     "🎯 Direct hit! Impressive guess! 🧠",
     "🚀 Sky high! That was fast! ✨",
@@ -24,9 +24,8 @@ const successMessages = [
     "🤩 Legendary guess! You're unstoppable! 🌟"
 ];
 
-
 client.commands = new Collection();
-client.activeGuesses = {}; // Pour suivre les guesses en cours
+client.activeGuesses = {};
 
 // Lecture des commandes
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
@@ -76,23 +75,23 @@ client.on('interactionCreate', async interaction => {
         await command.execute(interaction, client);
     } catch (error) {
         console.error(error);
-        await interaction.reply({ content: 'Erreur lors de l\’exécution de la commande.', ephemeral: true });
+        await interaction.reply({ content: 'Erreur lors de l’exécution de la commande.', ephemeral: true });
     }
 });
 
-// Message de confirmation quand le bot est prêt
+// Bot prêt
 client.once('ready', () => {
     console.log(`🤖 Bot connecté en tant que ${client.user.tag}`);
 });
 
-// Détection des bonnes réponses utilisateur
+// Détection des bonnes réponses
 client.on('messageCreate', async message => {
     if (message.author.bot || !client.activeGuesses[message.author.id]) return;
 
     const userGuess = client.activeGuesses[message.author.id];
     if (!userGuess || Date.now() > userGuess.timeout) return;
-    const guess = message.content.toLowerCase().trim();
 
+    const guess = message.content.toLowerCase().trim();
     const validAnswers = [
         userGuess.name.toLowerCase(),
         userGuess.alias?.toLowerCase()
@@ -103,35 +102,43 @@ client.on('messageCreate', async message => {
 
     const username = message.author.username;
     const coasterName = userGuess.name;
-
     const difficulty = userGuess.difficulty?.toLowerCase() || "easy";
+
     let creditGain = 1;
     if (difficulty === "medium") creditGain = 2;
     else if (difficulty === "hard") creditGain = 3;
 
+    // Insérer dans user_coasters si non déjà présent
     client.db.query(`
         INSERT IGNORE INTO user_coasters (username, coaster_id)
         SELECT ?, id FROM coasters WHERE LOWER(name) = ? OR LOWER(alias) = ?
     `, [username, coasterName.toLowerCase(), coasterName.toLowerCase()]);
-    
 
+    // Étape 1 : créer un utilisateur si non existant
     client.db.query(`
-        INSERT INTO users (username, credits, streak, best_streak, guild_id)
-        VALUES (?, ?, 1, 1, ?)
-        ON DUPLICATE KEY UPDATE 
-            credits = credits + ?,
-            streak = streak + 1,
-            best_streak = GREATEST(best_streak, streak + 1),
-            last_played = NOW()
-    `, [username, creditGain, message.guildId, creditGain], err => {    
+        INSERT IGNORE INTO users (username, credits, streak, best_streak, guild_id)
+        VALUES (?, 0, 0, 0, ?)
+    `, [username, message.guildId], (err) => {
         if (err) return console.error(err);
-    
-        client.db.query(`SELECT credits, streak FROM users WHERE username = ?`, [username], (err, rows) => {
-            if (err || rows.length === 0) return;    
-                
-                const randomMessage = successMessages[Math.floor(Math.random() * successMessages.length)];
+
+        // Étape 2 : mettre à jour les valeurs
+        client.db.query(`
+            UPDATE users
+            SET 
+                credits = credits + ?,
+                streak = streak + 1,
+                best_streak = GREATEST(best_streak, streak + 1),
+                last_played = NOW()
+            WHERE username = ?
+        `, [creditGain, username], (err) => {
+            if (err) return console.error(err);
+
+            client.db.query(`SELECT credits, streak, best_streak FROM users WHERE username = ?`, [username], (err, rows) => {
+                if (err || rows.length === 0) return;
+
                 const { credits, streak, best_streak } = rows[0];
-    
+                const randomMessage = successMessages[Math.floor(Math.random() * successMessages.length)];
+
                 const embed = new EmbedBuilder()
                     .setColor(0x2ecc71)
                     .setTitle(randomMessage)
@@ -140,13 +147,11 @@ client.on('messageCreate', async message => {
                         { name: '<a:Medaille:1367883558839914516> Crédit(s)', value: `+${creditGain}`, inline: true },
                         { name: '🔥 Streak', value: `${streak}`, inline: true }
                     );
-    
+
                 message.reply({ embeds: [embed] });
-            }
-        );
+            });
+        });
     });
-    
-    
 
     delete client.activeGuesses[message.author.id];
 });
