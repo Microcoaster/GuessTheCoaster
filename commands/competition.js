@@ -65,14 +65,14 @@ module.exports = {
             // Fin du round après 60s
             setTimeout(() => {
                 if (client.currentCompetition && Date.now() > client.currentCompetition.timeout) {
-                    client.currentCompetition = null;
-
                     const timeoutEmbed = new EmbedBuilder()
                         .setTitle("⏱️ Time's Up!")
                         .setDescription("No one guessed the coaster in time.")
                         .setColor(0xd9534f);
 
-                    interaction.followUp({ embeds: [timeoutEmbed] });
+                    interaction.followUp({ embeds: [timeoutEmbed] }).catch(console.error);
+                    client.currentCompetition = null;
+                    clearInterval(interval);
                 }
             }, seconds * 1000);
         });
