@@ -66,8 +66,10 @@ module.exports = {
             client.activeGuesses[userId] = {
                 name: coaster.name.toLowerCase(),
                 alias: coaster.alias ? coaster.alias.toLowerCase() : null,
+                difficulty: coaster.difficulty?.toLowerCase() || "easy",
                 timeout: Date.now() + secondsLeft * 1000
             };
+            
 
             const createEmbed = (timeDisplay) => {
                 return new EmbedBuilder()

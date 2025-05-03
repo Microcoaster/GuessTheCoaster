@@ -105,8 +105,8 @@ client.on('messageCreate', async message => {
     const difficulty = userGuess.difficulty?.toLowerCase() || "easy";
 
     let creditGain = 1;
-    if (difficulty === "Medium") creditGain = 2;
-    else if (difficulty === "Hard") creditGain = 3;
+    if (difficulty === "medium") creditGain = 2;
+    else if (difficulty === "hard") creditGain = 3;
 
     // Insérer dans user_coasters si non déjà présent
     client.db.query(`
