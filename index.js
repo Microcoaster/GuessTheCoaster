@@ -154,6 +154,12 @@ client.on('messageCreate', async message => {
                         });
 
                     message.channel.send({ embeds: [embed] }).then(() => {
+
+                        if (client.currentCompetition.interval) {
+                            clearInterval(client.currentCompetition.interval);
+                        }
+
+                        // Réinitialise le message de compétition
                         if (client.currentCompetition.message) {
                             const updatedEmbed = EmbedBuilder.from(client.currentCompetition.message.embeds[0])
                                 .setDescription(`✅ The coaster was guessed by **${username}**!\n\n🏁 Competition over!`)
