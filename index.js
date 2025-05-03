@@ -71,7 +71,7 @@ client.once('ready', () => {
     console.log(`🤖 Bot connecté en tant que ${client.user.tag}`);
 });
 
-// 🎯 Détection des bonnes réponses utilisateur
+// Détection des bonnes réponses utilisateur
 client.on('messageCreate', async message => {
     if (message.author.bot || !client.activeGuesses[message.author.id]) return;
 
