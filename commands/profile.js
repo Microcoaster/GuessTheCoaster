@@ -15,7 +15,7 @@ module.exports = {
         const username = targetUser.username;
         const avatar = targetUser.displayAvatarURL();
 
-        client.db.query(`SELECT credits, streak, best_streak FROM users WHERE username = ?`, [username], (err, rows) => {
+        client.db.query(`SELECT credits, streak, best_streak, contributor FROM users WHERE username = ?`, [username], (err, rows) => {
             if (err || rows.length === 0) {
                 const notFoundEmbed = new EmbedBuilder()
                     .setTitle('User Profile Not Found!')
@@ -24,7 +24,7 @@ module.exports = {
                 return interaction.reply({ embeds: [notFoundEmbed], ephemeral: true });
             }
 
-            const { credits, streak, best_streak } = rows[0];
+            const { credits, streak, best_streak, contributor } = rows[0];
 
             // Requête 1 : coasters collectés par difficulté
             client.db.query(`
@@ -59,13 +59,14 @@ module.exports = {
                     const totalCollected = collectedMap.Easy + collectedMap.Medium + collectedMap.Hard;
                     const completion = ((totalCollected / totalCoasters) * 100).toFixed(2);
 
-                    // Badges dynamiques
+                    // 🏅 Badges dynamiques
                     let badges = '';
                     if (completion >= 50) badges += '<:50Completion:1367798353559027824> ';
                     if (completion == 100) badges += '<:100Completion:1367798366116773979> ';
                     if (best_streak >= 10) badges += '<:10Streak:1367800181709471824> ';
                     if (best_streak >= 50) badges += '<:50Streak:1367800333144821801> ';
                     if (username.toLowerCase() === 'cybertrist') badges += '<:Owner:1367800341676167208> ';
+                    if (contributor === 1) badges += '<:contributor:1367796340725383221> ';
 
                     const embed = new EmbedBuilder()
                         .setTitle(`${username}'s Profile`)
@@ -78,23 +79,14 @@ module.exports = {
                             `Best Streak: **${best_streak}** 🔥`
                         )
                         .addFields(
-                            {
-                                name: 'Easy', value: `${collectedMap.Easy}/${totalMap.Easy}`, inline: true
-                            },
-                            {
-                                name: 'Medium', value: `${collectedMap.Medium}/${totalMap.Medium}`, inline: true
-                            },
-                            {
-                                name: 'Hard', value: `${collectedMap.Hard}/${totalMap.Hard}`, inline: true
-                            },
-                            {
-                                name: 'Badges',
-                                value: badges || '*None! 😢*'
-                            }
+                            { name: 'Easy', value: `${collectedMap.Easy}/${totalMap.Easy}`, inline: true },
+                            { name: 'Medium', value: `${collectedMap.Medium}/${totalMap.Medium}`, inline: true },
+                            { name: 'Hard', value: `${collectedMap.Hard}/${totalMap.Hard}`, inline: true },
+                            { name: 'Badges', value: badges || '*None! 😢*' }
                         )
                         .setTimestamp();
 
-                    interaction.reply({ embeds: [embed], ephemeral: false });
+                    interaction.reply({ embeds: [embed] });
                 });
             });
         });
