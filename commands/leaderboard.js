@@ -8,7 +8,6 @@ module.exports = {
     async execute(interaction, client) {
         const guildId = interaction.guildId;
 
-        // Récupération du nombre total de coasters
         const totalCoasters = await new Promise((resolve) => {
             client.db.query(`SELECT COUNT(*) as total FROM coasters`, (err, res) => {
                 if (err) return resolve(0);
@@ -16,7 +15,6 @@ module.exports = {
             });
         });
 
-        // Fonctions SQL pour récupérer les données
         const fetchData = (query, params = []) => {
             return new Promise((resolve) => {
                 client.db.query(query, params, (err, rows) => {
@@ -29,7 +27,6 @@ module.exports = {
             });
         };
 
-        // Global Queries
         const globalCredits = await fetchData(`SELECT username, credits FROM users ORDER BY credits DESC LIMIT 10`);
         const globalCompletion = await fetchData(`
             SELECT u.username, COUNT(DISTINCT uc.coaster_id) AS collected
@@ -41,24 +38,22 @@ module.exports = {
         `);
         const globalStreak = await fetchData(`SELECT username, best_streak FROM users ORDER BY best_streak DESC LIMIT 10`);
 
-        // Local Queries
         const localCredits = await fetchData(`
             SELECT username, credits FROM users 
             WHERE guild_id = ? ORDER BY credits DESC LIMIT 10`, [guildId]);
-            const localCompletion = await fetchData(`
-                SELECT u.username, COUNT(DISTINCT uc.coaster_id) AS collected
-                FROM user_coasters uc
-                JOIN users u ON u.username = uc.username
-                WHERE u.guild_id = ?
-                GROUP BY uc.username
-                ORDER BY collected DESC
-                LIMIT 10
-            `, [guildId]);            
+        const localCompletion = await fetchData(`
+            SELECT u.username, COUNT(DISTINCT uc.coaster_id) AS collected
+            FROM user_coasters uc
+            JOIN users u ON u.username = uc.username
+            WHERE u.guild_id = ?
+            GROUP BY uc.username
+            ORDER BY collected DESC
+            LIMIT 10
+        `, [guildId]);
         const localStreak = await fetchData(`
             SELECT username, best_streak FROM users 
             WHERE guild_id = ? ORDER BY best_streak DESC LIMIT 10`, [guildId]);
 
-        // ⬇Formatage des textes
         const formatList = (list, label) => {
             return list.map((row, i) => {
                 let value = row.credits || row.best_streak || row.collected || 0;
@@ -70,97 +65,97 @@ module.exports = {
             }).join('\n') || "*Not enough data yet!*";
         };
 
-        const globalEmbeds = [
-            new EmbedBuilder()
-                .setTitle(`📕 Global Leaderboard`)
-                .addFields(
-                    { name: `Top ${globalCredits.length} Credits 🎢`, value: formatList(globalCredits, 'credits') },
-                    { name: `Top ${globalCompletion.length} Completion <:trophe:1368024238371508315>`, value: formatList(globalCompletion, 'completion') }
-                )
-                .setFooter({ text: 'Page 1/2  •  Buttons expire after 30 seconds' })
-                .setColor(0xffffff)
-                .setTimestamp(),
-            new EmbedBuilder()
-                .setTitle(`📕 Global Leaderboard`)
-                .addFields(
-                    { name: `Top ${globalStreak.length} Streaks 🔥`, value: formatList(globalStreak, 'streak') }
-                )
-                .setFooter({ text: 'Page 2/2  •  Buttons expire after 30 seconds' })
-                .setColor(0xffffff)
-                .setTimestamp()
-        ];
+        const createEmbeds = (scope, color) => {
+            const credits = scope === 'Global' ? globalCredits : localCredits;
+            const completion = scope === 'Global' ? globalCompletion : localCompletion;
+            const streaks = scope === 'Global' ? globalStreak : localStreak;
 
-        const localEmbeds = [
-            new EmbedBuilder()
-                .setTitle(`📘 Local Leaderboard`)
-                .addFields(
-                    { name: `Top ${localCredits.length} Credits 🎢`, value: formatList(localCredits, 'credits') },
-                    { name: `Top ${localCompletion.length} Completion <:trophe:1368024238371508315>`, value: formatList(localCompletion, 'completion') }
-                )
-                .setFooter({ text: 'Page 1/2  •  Buttons expire after 30 seconds' })
-                .setColor(0xffffff)
-                .setTimestamp(),
-            new EmbedBuilder()
-                .setTitle(`📘 Local Leaderboard`)
-                .addFields(
-                    { name: `Top ${localStreak.length} Streaks 🔥`, value: formatList(localStreak, 'streak') },
-                )
-                .setFooter({ text: 'Page 2/2  •  Buttons expire after 30 seconds' })
-                .setColor(0xffffff)
-                .setTimestamp()
-        ];
+            return [
+                new EmbedBuilder()
+                    .setTitle(`${scope === 'Global' ? '📕' : '📘'} ${scope} Leaderboard`)
+                    .addFields(
+                        { name: `Top ${credits.length} Credits 🎢`, value: formatList(credits, 'credits') },
+                        { name: `Top ${completion.length} Completion <:trophe:1368024238371508315>`, value: formatList(completion, 'completion') }
+                    )
+                    .setFooter({ text: 'Page 1/2  •  Buttons expire after 30 seconds' })
+                    .setColor(color)
+                    .setTimestamp(),
+                new EmbedBuilder()
+                    .setTitle(`${scope === 'Global' ? '📕' : '📘'} ${scope} Leaderboard`)
+                    .addFields(
+                        { name: `Top ${streaks.length} Streaks 🔥`, value: formatList(streaks, 'streak') }
+                    )
+                    .setFooter({ text: 'Page 2/2  •  Buttons expire after 30 seconds' })
+                    .setColor(color)
+                    .setTimestamp()
+            ];
+        };
 
-        //  Boutons
         const makeButtons = (scope = 'Global', page = 1) => {
             const backId = scope === 'Global' ? 'global1' : 'local1';
             const forwardId = scope === 'Global' ? 'global2' : 'local2';
             const switchId = scope === 'Global' ? 'local' : 'global';
-            return new ActionRowBuilder().addComponents(
+            const color = scope === 'Global' ? 0xff4c4c : 0x4c6fff;
+
+            const buttons = new ActionRowBuilder().addComponents(
                 new ButtonBuilder().setCustomId(backId).setLabel('←').setStyle(1).setDisabled(page === 1),
                 new ButtonBuilder().setCustomId(switchId).setLabel(scope === 'Global' ? 'Show Local' : 'Show Global').setStyle(3),
                 new ButtonBuilder().setCustomId(forwardId).setLabel('→').setStyle(1).setDisabled(page === 2)
             );
+
+            return { buttons, color };
         };
 
-        //  Réponse initiale
+        let currentScope = 'Global';
+        let currentPage = 1;
+
+        const { buttons, color } = makeButtons(currentScope, currentPage);
+        const embeds = createEmbeds(currentScope, color);
+
         const reply = await interaction.reply({
-            embeds: [globalEmbeds[0]],
-            components: [makeButtons('Global', 1)]
+            embeds: [embeds[0]],
+            components: [buttons]
         });
 
         const collector = reply.createMessageComponentCollector({ time: 30000 });
 
         collector.on('collect', async btn => {
             await btn.deferUpdate();
-            let embed, buttons;
+
             switch (btn.customId) {
                 case 'global2':
-                    embed = globalEmbeds[1];
-                    buttons = makeButtons('Global', 2);
+                    currentScope = 'Global';
+                    currentPage = 2;
                     break;
                 case 'global1':
-                    embed = globalEmbeds[0];
-                    buttons = makeButtons('Global', 1);
+                    currentScope = 'Global';
+                    currentPage = 1;
                     break;
                 case 'local':
-                    embed = localEmbeds[0];
-                    buttons = makeButtons('Local', 1);
+                    currentScope = 'Local';
+                    currentPage = 1;
                     break;
                 case 'local2':
-                    embed = localEmbeds[1];
-                    buttons = makeButtons('Local', 2);
+                    currentScope = 'Local';
+                    currentPage = 2;
                     break;
                 case 'local1':
-                    embed = localEmbeds[0];
-                    buttons = makeButtons('Local', 1);
+                    currentScope = 'Local';
+                    currentPage = 1;
                     break;
                 case 'global':
-                    embed = globalEmbeds[0];
-                    buttons = makeButtons('Global', 1);
+                    currentScope = 'Global';
+                    currentPage = 1;
                     break;
             }
 
-            await reply.edit({ embeds: [embed], components: [buttons] });
+            const { buttons, color } = makeButtons(currentScope, currentPage);
+            const embeds = createEmbeds(currentScope, color);
+
+            await reply.edit({
+                embeds: [embeds[currentPage - 1]],
+                components: [buttons]
+            });
         });
 
         collector.on('end', () => {
