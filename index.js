@@ -83,14 +83,31 @@ client.on('interactionCreate', async interaction => {
 client.once('ready', () => {
     console.log(`🤖 Bot connecté en tant que ${client.user.tag}`);
 
-    client.user.setPresence({
-        activities: [{
-            name: 'Currently stuck upside down...',
-            type: 0 // PLAYING
-        }],
-        status: 'online'
-    });
+    
+    const statuses = [
+        "🎢 On a wild ride!",
+        "🌳 Guess the coaster!",
+        "🎯 Will you get it right?",
+        "🧩 Try to solve the mystery!",
+        "🏁 Ride loading... hold tight!",
+        "✨ From zero to 120km/h!"
+    ];
+
+    let index = 0;
+
+    // Update every 15 secondes
+    setInterval(() => {
+        client.user.setPresence({
+            activities: [{
+                name: statuses[index % statuses.length],
+                type: 0
+            }],
+            status: 'online'
+        });
+        index++;
+    }, 15000);
 });
+
 
 // Détection des bonnes réponses
 client.on('messageCreate', async message => {
