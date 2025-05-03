@@ -14,7 +14,7 @@ const client = new Client({
 const successMessages = [
     "🎯 Spot on! Great job! 🚀",
     "🌟 Nailed it! Well done! 🎉",
-    "🌀 You crushed it! Let’s go! 🎢",
+    "🌀 You crushed it! Let\’s go! 🎢",
     "💡 Bingo! You're on fire! 🔥",
     "🎯 Direct hit! Impressive guess! 🧠",
     "🚀 Sky high! That was fast! ✨",
@@ -104,6 +104,11 @@ client.on('messageCreate', async message => {
     const username = message.author.username;
     const coasterName = userGuess.name;
 
+    const difficulty = userGuess.difficulty?.toLowerCase() || "easy";
+    let creditGain = 1;
+    if (difficulty === "medium") creditGain = 2;
+    else if (difficulty === "hard") creditGain = 3;
+
     client.db.query(`
         INSERT IGNORE INTO user_coasters (username, coaster_id)
         SELECT ?, id FROM coasters WHERE LOWER(name) = ? OR LOWER(alias) = ?
@@ -112,21 +117,17 @@ client.on('messageCreate', async message => {
 
     client.db.query(`
         INSERT INTO users (username, credits, streak, best_streak, guild_id)
-        VALUES (?, 1, 1, 1, ?)
+        VALUES (?, ?, 1, 1, ?)
         ON DUPLICATE KEY UPDATE 
-            credits = credits + 1, 
+            credits = credits + VALUES(credits), 
             streak = streak + 1,
             best_streak = GREATEST(best_streak, streak),
-            guild_id = VALUES(guild_id),
             last_played = NOW()
-    `, [username, message.guildId], err => {
+    `, [username, creditGain, message.guildId], err => {
         if (err) return console.error(err);
     
-        client.db.query(
-            `SELECT credits, streak, best_streak FROM users WHERE username = ?`,
-            [username],
-            (err, rows) => {
-                if (err || rows.length === 0) return;
+        client.db.query(`SELECT credits, streak FROM users WHERE username = ?`, [username], (err, rows) => {
+            if (err || rows.length === 0) return;    
                 
                 const randomMessage = successMessages[Math.floor(Math.random() * successMessages.length)];
                 const { credits, streak, best_streak } = rows[0];
@@ -136,7 +137,7 @@ client.on('messageCreate', async message => {
                     .setTitle(randomMessage)
                     .setDescription(`**${username}** guessed "**${coasterName}**" correctly!`)
                     .addFields(
-                        { name: '<a:Medaille:1367883558839914516> Crédit(s)', value: '+1', inline: true },
+                        { name: '<a:Medaille:1367883558839914516> Crédit(s)', value: `+${creditGain}`, inline: true },
                         { name: '🔥 Streak', value: `${streak}`, inline: true }
                     );
     
