@@ -15,7 +15,7 @@ module.exports = {
         const username = targetUser.username;
         const avatar = targetUser.displayAvatarURL();
 
-        client.db.query(`SELECT credits, streak, best_streak, contributor, competition_winner FROM users WHERE username = ?`, [username], (err, rows) => {
+        client.db.query(`SELECT credits, streak, best_streak, contributor, competition_winner, has_completed FROM users WHERE username = ?`, [username], (err, rows) => {
             if (err || rows.length === 0) {
                 const notFoundEmbed = new EmbedBuilder()
                     .setTitle('User Profile Not Found!')
@@ -24,7 +24,7 @@ module.exports = {
                 return interaction.reply({ embeds: [notFoundEmbed], ephemeral: true });
             }
 
-            const { credits, streak, best_streak, contributor, competition_winner} = rows[0];
+            const { credits, streak, best_streak, contributor, competition_winner, has_completed} = rows[0];
 
             // Requête 1 : coasters collectés par difficulté
             client.db.query(`
@@ -65,7 +65,7 @@ module.exports = {
                             err => {
                                 if (err) console.error('Erreur lors du marquage has_completed :', err);
                             }
-                        );
+                        );                        
                     }                    
 
                     // 🏅 Badges dynamiques
