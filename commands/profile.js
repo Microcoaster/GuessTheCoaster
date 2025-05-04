@@ -58,11 +58,22 @@ module.exports = {
                     const totalCoasters = totalMap.Easy + totalMap.Medium + totalMap.Hard;
                     const totalCollected = collectedMap.Easy + collectedMap.Medium + collectedMap.Hard;
                     const completion = ((totalCollected / totalCoasters) * 100).toFixed(2);
+                    if (parseFloat(completion) === 100 && rows[0].has_completed === 0) {
+                        client.db.query(
+                            `UPDATE users SET has_completed = 1 WHERE username = ?`,
+                            [username],
+                            err => {
+                                if (err) console.error('Erreur lors du marquage has_completed :', err);
+                            }
+                        );
+                    }                    
 
                     // 🏅 Badges dynamiques
                     let badges = '';
                     if (completion >= 50) badges += '<:50Completion:1367798353559027824> ';
-                    if (completion == 100) badges += '<:100Completion:1367798366116773979> ';
+                    if (completion == 100 || rows[0].has_completed === 1) {
+                        badges += '<:100Completion:1367798366116773979> ';
+                    }                    
                     if (best_streak >= 10) badges += '<:10Streak:1367800181709471824> ';
                     if (best_streak >= 50) badges += '<:50Streak:1367800333144821801> ';
                     if (contributor === 1) badges += '<:contributor:1367796340725383221> ';
