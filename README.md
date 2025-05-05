@@ -48,7 +48,10 @@
 | `/commands`        | List all available commands in the bot                         |
 | `/about`           | Learn more about the GuessTheCoaster bot                       |
 | `/ping`            | Check the bot’s latency and responsiveness                     |
-
+| `/competition`    | Lance une devinette ouverte, le premier à trouver gagne +5 crédits & un rôle spécial |
+| `/endgame`        | Termine la session de jeu en cours (si applicable)                                   |
+| `/competition`    | Launch an open challenge; first correct answer earns +5 credits & a special role |
+| `/endgame`        | End the current guessing session (if applicable)                                 |
 
 ## 🧑‍💻 Dev Setup
 
@@ -71,38 +74,42 @@ DB_NAME=your_db
 
 `node index.js`
 
-
-## 🗂️ Database Schema
-
 ### 📄 `users`
-| Column       | Type     | Description                             |
-|--------------|----------|-----------------------------------------|
-| `username`   | VARCHAR  | Unique username of the user             |
-| `credits`    | INT      | Number of credits earned                |
-| `streak`     | INT      | Current correct guess streak            |
-| `best_streak`| INT      | Highest streak achieved                 |
-| `contributor`| BOOLEAN  | Whether the user is a contributor (1/0) |
-| `guild_id`   | VARCHAR  | ID of the Discord server (guild)        |
+
+| Column               | Type        | Description                                                   |
+| -------------------- | ----------- | ------------------------------------------------------------- |
+| `id`                 | INT         | Unique user ID (auto-incremented)                             |
+| `username`           | VARCHAR(50) | Unique username                                               |
+| `credits`            | INT         | Total credits earned                                          |
+| `streak`             | INT         | Current correct answer streak                                 |
+| `best_streak`        | INT         | Highest streak achieved                                       |
+| `last_played`        | DATETIME    | Last time the user played                                     |
+| `guild_id`           | VARCHAR(64) | Discord server (guild) ID                                     |
+| `contributor`        | BOOLEAN     | Whether the user is a contributor (1 = yes, 0 = no)           |
+| `competition_winner` | BOOLEAN     | Whether the user has won at least one `/competition` round    |
+| `has_completed`      | BOOLEAN     | Whether the user has guessed all available coasters correctly |
+
 
 ---
 
 ### 🎢 `coasters`
-| Column       | Type     | Description                             |
-|--------------|----------|-----------------------------------------|
-| `id`         | INT      | Auto-increment coaster ID               |
-| `name`       | VARCHAR  | Main coaster name                       |
-| `alias`      | VARCHAR  | Alternate name (can be `NULL`)          |
-| `difficulty` | ENUM     | Coaster difficulty: `easy`, `medium`, `hard` |
-| `image_url`  | TEXT     | URL of the coaster image                |
+
+| Column       | Type    | Description                                   |
+| ------------ | ------- | --------------------------------------------- |
+| `id`         | INT     | Unique coaster ID (auto-incremented)          |
+| `name`       | VARCHAR | Primary name of the coaster                   |
+| `alias`      | VARCHAR | Alternate name (can be `NULL`)                |
+| `difficulty` | ENUM    | Difficulty level: `easy`, `medium`, or `hard` |
+| `image_url`  | TEXT    | URL to the coaster image                      |
 
 ---
 
 ### ✨ `user_coasters`
-| Column       | Type     | Description                             |
-|--------------|----------|-----------------------------------------|
-| `username`   | VARCHAR  | Username of the player                  |
-| `coaster_id` | INT      | ID of the guessed coaster               |
 
+| Column       | Type    | Description                                 |
+| ------------ | ------- | ------------------------------------------- |
+| `username`   | VARCHAR | Username of the player                      |
+| `coaster_id` | INT     | ID of the coaster they successfully guessed |
 
 ## 🤝 Contribute
 
