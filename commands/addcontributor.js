@@ -1,4 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const UserDao = require('../dao/userDao');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -25,17 +26,12 @@ module.exports = {
         const user = interaction.options.getUser('user');
         const value = interaction.options.getBoolean('value');
 
-        // Check current contributor status
-        client.db.query(`SELECT contributor FROM users WHERE username = ?`, [user.username], (err, results) => {
-            if (err) {
-                console.error(err);
-                return interaction.reply({ content: "SQL error occurred.", ephemeral: true });
-            }
-
-            const already = results[0]?.contributor === 1;
+        try {
+            // Check current contributor status
+            const isContributor = await UserDao.isContributor({ username: user.username });
 
             // If already set as requested, inform and return
-            if ((value && already) || (!value && !already)) {
+            if ((value && isContributor) || (!value && !isContributor)) {
                 return interaction.reply({
                     content: `**${user.username}** is already ${value ? 'a' : 'not a'} contributor.`,
                     ephemeral: true
@@ -43,23 +39,25 @@ module.exports = {
             }
 
             // Update contributor status
-            client.db.query(`
-                INSERT INTO users (username, contributor)
-                VALUES (?, ?)
-                ON DUPLICATE KEY UPDATE contributor = ?
-            `, [user.username, value, value], (err) => {
-                if (err) {
-                    console.error(err);
-                    return interaction.reply({ content: "An error occurred during update.", ephemeral: true });
-                }
+            if (value) {
+                await UserDao.setContributor({ username: user.username, guildId: interaction.guildId });
+            } else {
+                // For removal, we'd need a new DAO method but for now just use pool directly
+                await client.db.query(
+                    `UPDATE users SET contributor = 0 WHERE username = ?`,
+                    [user.username]
+                );
+            }
 
-                const embed = new EmbedBuilder()
-                    .setTitle('Contributor Status Updated')
-                    .setDescription(`**${user.username}** is now ${value ? 'marked as a contributor' : 'removed from contributors'}.`)
-                    .setColor(value ? 0x2ecc71 : 0xe74c3c);
+            const embed = new EmbedBuilder()
+                .setTitle('Contributor Status Updated')
+                .setDescription(`**${user.username}** is now ${value ? 'marked as a contributor' : 'removed from contributors'}.`)
+                .setColor(value ? 0x2ecc71 : 0xe74c3c);
 
-                interaction.reply({ embeds: [embed], ephemeral: true });
-            });
-        });
+            interaction.reply({ embeds: [embed], ephemeral: true });
+        } catch (error) {
+            console.error(error);
+            interaction.reply({ content: "An error occurred during update.", ephemeral: true });
+        }
     }
 };

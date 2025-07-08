@@ -1,4 +1,6 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const CoasterDao = require('../dao/coasterDao');
+const UserDao = require('../dao/userDao');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -19,18 +21,19 @@ module.exports = {
     async execute(interaction, client) {
         const selected = interaction.options.getString('difficulty') || 'random';
 
-        const sql = selected === 'random'
-            ? `SELECT * FROM coasters ORDER BY RAND() LIMIT 1`
-            : `SELECT * FROM coasters WHERE difficulty = ? ORDER BY RAND() LIMIT 1`;
+        try {
+            let coaster;
+            if (selected === 'random') {
+                coaster = await CoasterDao.getRandomOne();
+            } else {
+                const results = await CoasterDao.getFiltered({ difficulty: selected });
+                coaster = results[0];
+            }
 
-        const params = selected === 'random' ? [] : [selected];
-
-        client.db.query(sql, params, async (err, results) => {
-            if (err || results.length === 0) {
+            if (!coaster) {
                 return interaction.reply({ content: 'No coaster found for that difficulty.', ephemeral: true });
             }
 
-            const coaster = results[0];
             const userId = interaction.user.id;
 
             if (client.activeGuesses && client.activeGuesses[userId]) {
@@ -43,7 +46,7 @@ module.exports = {
             if (!client.activeGuesses) client.activeGuesses = {};
 
             let secondsLeft;
-            let displayedDifficulty = coaster.difficulty; // Pour affichage correct si random
+            let displayedDifficulty = coaster.difficulty;
 
             if (selected === 'random') {
                 switch (coaster.difficulty) {
@@ -94,7 +97,7 @@ module.exports = {
                 interaction.editReply({ embeds: [createEmbed(`Time left: **${secondsLeft}s**`)] });
             }, 1000);
 
-            setTimeout(() => {
+            setTimeout(async () => {
                 const active = client.activeGuesses[userId];
                 if (active && Date.now() > active.timeout) {
                     delete client.activeGuesses[userId];
@@ -103,17 +106,19 @@ module.exports = {
                         .setTitle("⏱️ Time's Up!")
                         .setDescription("Nobody Guessed the Correct Roller Coaster!")
                         .setColor(0xd9534f);
-                        client.db.query(
-                            `UPDATE users SET streak = 0 WHERE username = ?`,
-                            [interaction.user.username],
-                            err => {
-                                if (err) console.error('Erreur lors du reset du streak :', err);
-                            }
-                        );
+                        
+                    try {
+                        await UserDao.resetStreak({ username: interaction.user.username });
+                    } catch (error) {
+                        console.error('Erreur lors du reset du streak :', error);
+                    }
                         
                     interaction.followUp({ embeds: [timeoutEmbed] });
                 }
             }, secondsLeft * 1000);            
-        });
+        } catch (error) {
+            console.error(error);
+            interaction.reply({ content: 'Error while fetching coaster data.', ephemeral: true });
+        }
     }
 };

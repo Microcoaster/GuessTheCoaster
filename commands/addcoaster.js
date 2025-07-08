@@ -1,4 +1,6 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const UserDao = require('../dao/userDao');
+const CoasterDao = require('../dao/coasterDao');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -39,14 +41,10 @@ module.exports = {
             });
         }
 
-        // Check contributor status
-        client.db.query(`SELECT contributor FROM users WHERE username = ?`, [username], (err, results) => {
-            if (err) {
-                console.error(err);
-                return interaction.reply({ content: "SQL error while checking contributor status.", ephemeral: true });
-            }
-
-            if (results.length === 0 || results[0].contributor !== 1) {
+        try {
+            // Check contributor status
+            const isContributor = await UserDao.isContributor({ username });
+            if (!isContributor) {
                 return interaction.reply({
                     content: "You are not authorized to use this command. Only contributors can add coasters.",
                     ephemeral: true
@@ -64,49 +62,49 @@ module.exports = {
             const aliasFinal = alias.toLowerCase() === "x" ? null : alias;
 
             // Check for duplicate coaster name
-            client.db.query(`SELECT id FROM coasters WHERE name = ?`, [name], (err, existing) => {
-                if (err) {
-                    console.error(err);
-                    return interaction.reply({
-                        content: "An error occurred while checking for duplicates.",
-                        ephemeral: true
-                    });
-                }
-
-                if (existing.length > 0) {
-                    return interaction.reply({
-                        content: `A coaster named **${name}** already exists in the database.`,
-                        ephemeral: true
-                    });
-                }
-
-                // Insert new coaster
-                client.db.query(`
-                    INSERT INTO coasters (name, alias, difficulty, image_url)
-                    VALUES (?, ?, ?, ?)
-                `, [name, aliasFinal, difficulty, imageUrl], (err) => {
-                    if (err) {
-                        console.error(err);
-                        return interaction.reply({
-                            content: "An error occurred while adding the coaster.",
-                            ephemeral: true
-                        });
-                    }
-
-                    const embed = new EmbedBuilder()
-                        .setTitle("New Coaster Added!")
-                        .setDescription(`The coaster **${name}** was successfully added to the database.`)
-                        .addFields(
-                            { name: "Alias", value: aliasFinal || "*None*", inline: true },
-                            { name: "Difficulty", value: difficulty, inline: true }
-                        )
-                        .setImage(imageUrl)
-                        .setColor(0x00b894)
-                        .setTimestamp();
-
-                    interaction.reply({ embeds: [embed] });
+            const exists = await CoasterDao.existsByName(name);
+            if (exists) {
+                return interaction.reply({
+                    content: `A coaster named **${name}** already exists in the database.`,
+                    ephemeral: true
                 });
+            }
+
+            // Insert new coaster (simplified data for this example)
+            await CoasterDao.insert({
+                name,
+                alias: aliasFinal,
+                park: "Unknown", // You can add more fields as needed
+                country: "Unknown",
+                continent: "Unknown",
+                type: "Unknown",
+                manufacturer: "Unknown",
+                year: null,
+                height: null,
+                speed: null,
+                inversions: null,
+                difficulty,
+                image: imageUrl
             });
-        });
+
+            const embed = new EmbedBuilder()
+                .setTitle("New Coaster Added!")
+                .setDescription(`The coaster **${name}** was successfully added to the database.`)
+                .addFields(
+                    { name: "Alias", value: aliasFinal || "*None*", inline: true },
+                    { name: "Difficulty", value: difficulty, inline: true }
+                )
+                .setImage(imageUrl)
+                .setColor(0x00b894)
+                .setTimestamp();
+
+            interaction.reply({ embeds: [embed] });
+        } catch (error) {
+            console.error(error);
+            interaction.reply({
+                content: "An error occurred while processing your request.",
+                ephemeral: true
+            });
+        }
     }
 };

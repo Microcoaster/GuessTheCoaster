@@ -1,4 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require('discord.js');
+const UserDao = require('../dao/userDao');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -16,8 +17,9 @@ module.exports = {
         if (targetUser.id !== interaction.user.id) {
             const requester = interaction.user.username;
 
-            client.db.query(`SELECT contributor FROM users WHERE username = ?`, [requester], (err, rows) => {
-                if (err || rows.length === 0 || rows[0].contributor !== 1) {
+            try {
+                const isContributor = await UserDao.isContributor({ username: requester });
+                if (!isContributor) {
                     return interaction.reply({
                         content: "You are not authorized to cancel another user's guess.",
                         ephemeral: true
@@ -25,7 +27,13 @@ module.exports = {
                 }
 
                 endGuess(targetUser, interaction, client);
-            });
+            } catch (error) {
+                console.error(error);
+                return interaction.reply({
+                    content: "Error checking permissions.",
+                    ephemeral: true
+                });
+            }
         } else {
             endGuess(targetUser, interaction, client);
         }

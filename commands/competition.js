@@ -1,4 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const CoasterDao = require('../dao/coasterDao');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -13,16 +14,15 @@ module.exports = {
             });
         }
 
-        client.db.query(`SELECT * FROM coasters ORDER BY RAND() LIMIT 1`, async (err, results) => {
-            if (err || results.length === 0) {
-                console.error(err);
+        try {
+            const coaster = await CoasterDao.getRandomOne();
+            if (!coaster) {
                 return interaction.reply({
                     content: 'Failed to fetch a coaster from the database.',
                     ephemeral: true
                 });
             }
 
-            const coaster = results[0];
             let secondsLeft = 60;
 
             const createEmbed = (timeDisplay) => {
@@ -78,6 +78,12 @@ module.exports = {
                     interaction.followUp({ embeds: [timeoutEmbed] }).catch(console.error);
                 }
             }, secondsLeft * 1000);
-        });
+        } catch (error) {
+            console.error(error);
+            interaction.reply({
+                content: 'An error occurred while starting the competition.',
+                ephemeral: true
+            });
+        }
     }
 };

@@ -1,6 +1,9 @@
 const { Client, GatewayIntentBits, Collection, REST, Routes, EmbedBuilder } = require('discord.js');
 const fs = require('fs');
-const mysql = require('mysql2');
+// Gestion MySQL via DAO
+const { pool, getSharedConnection } = require('./utils/dbManager');
+const UserDao = require('./dao/userDao');
+const UserCoasterDao = require('./dao/userCoasterDao');
 require('dotenv').config();
 
 const client = new Client({
@@ -39,18 +42,9 @@ for (const file of commandFiles) {
     commandsData.push(command.data.toJSON());
 }
 
-// Connexion MySQL
-const db = mysql.createConnection({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASS,
-    database: process.env.DB_NAME
-});
-db.connect(err => {
-    if (err) throw err;
-    console.log('Connecté à MySQL');
-});
-client.db = db;
+// Connexion MySQL via le pool (dbManager)
+client.db = pool;
+// Si besoin d'une connexion partagée : await getSharedConnection();
 
 // Déploiement des commandes slash
 const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
@@ -135,18 +129,12 @@ client.on('messageCreate', async message => {
             client.currentCompetition = null;
 
 
-            client.db.query(`
-                INSERT IGNORE INTO users (username, credits, streak, best_streak, contributor, competition_winner, guild_id)
-                VALUES (?, 0, 0, 0, 0, 0, ?)
-            `, [username, message.guildId], err => {
-                if (err) return console.error(err);
 
-                client.db.query(`
-                    UPDATE users
-                    SET credits = credits + 5, competition_winner = 1
-                    WHERE username = ?
-                `, [username], err => {
-                    if (err) return console.error(err);
+            // Utilisation du DAO pour la compétition
+            (async () => {
+                try {
+                    await UserDao.insertIfNotExists({ username, guildId: message.guildId });
+                    await UserDao.updateCompetitionWinner({ username });
 
                     const embed = new EmbedBuilder()
                         .setColor(0xf1c40f)
@@ -158,31 +146,32 @@ client.on('messageCreate', async message => {
                             inline: true
                         });
 
-                        message.channel.send({ embeds: [embed] }).then(() => {
-                            // 🛠 Met à jour l'embed initial de la compétition
-                            if (client.currentCompetition && !client.currentCompetition.hasWinner) {
-                                const originalEmbed = client.currentCompetition.message.embeds?.[0];
-                                if (originalEmbed) {
-                                    const updatedEmbed = EmbedBuilder.from(originalEmbed)
-                                        .setDescription(
-                                            `✅ The coaster was guessed by **${username}**!\n\n` +
-                                            '🎯 Be the **first** to guess the name of this coaster.\n' +
-                                            '<:competition_winner:1368317089156169739> Winner gets **+5 credits** and the **Competition Badge**!'
-                                        )
-                                        .setFooter({ text: '🏁 Competition over!' });
-                        
-                                    client.currentCompetition.message.edit({ embeds: [updatedEmbed] }).catch(console.error);
-                                }
-                            }
-                        
-                            // ✅ Marque la victoire
-                            if (client.currentCompetition) {
-                                client.currentCompetition.hasWinner = true;
-                                client.currentCompetition = null;
-                            }
-                        });                        
-                });
-            });
+                    await message.channel.send({ embeds: [embed] });
+
+                    // 🛠 Met à jour l'embed initial de la compétition
+                    if (client.currentCompetition && !client.currentCompetition.hasWinner) {
+                        const originalEmbed = client.currentCompetition.message.embeds?.[0];
+                        if (originalEmbed) {
+                            const updatedEmbed = EmbedBuilder.from(originalEmbed)
+                                .setDescription(
+                                    `✅ The coaster was guessed by **${username}**!\n\n` +
+                                    '🎯 Be the **first** to guess the name of this coaster.\n' +
+                                    '<:competition_winner:1368317089156169739> Winner gets **+5 credits** and the **Competition Badge**!'
+                                )
+                                .setFooter({ text: '🏁 Competition over!' });
+                            client.currentCompetition.message.edit({ embeds: [updatedEmbed] }).catch(console.error);
+                        }
+                    }
+
+                    // ✅ Marque la victoire
+                    if (client.currentCompetition) {
+                        client.currentCompetition.hasWinner = true;
+                        client.currentCompetition = null;
+                    }
+                } catch (err) {
+                    console.error(err);
+                }
+            })();
 
             return; // ✅ ne pas continuer avec le système normal
         }
@@ -214,48 +203,31 @@ client.on('messageCreate', async message => {
     if (difficulty === "medium") creditGain = 2;
     else if (difficulty === "hard") creditGain = 3;
 
-    client.db.query(`
-        INSERT IGNORE INTO user_coasters (username, coaster_id)
-        SELECT ?, id FROM coasters WHERE LOWER(name) = ? OR LOWER(alias) = ?
-    `, [username, coasterName.toLowerCase(), coasterName.toLowerCase()]);
-
-    client.db.query(`
-        INSERT IGNORE INTO users (username, credits, streak, best_streak, guild_id)
-        VALUES (?, 0, 0, 0, ?)
-    `, [username, message.guildId], err => {
-        if (err) return console.error(err);
-
-        client.db.query(`
-            UPDATE users
-            SET credits = credits + ?, streak = streak + 1, last_played = NOW()
-            WHERE username = ?
-        `, [creditGain, username], err => {
-            if (err) return console.error(err);
-
-            client.db.query(`SELECT credits, streak, best_streak FROM users WHERE username = ?`, [username], (err, rows) => {
-                if (err || rows.length === 0) return;
-
-                const { credits, streak, best_streak } = rows[0];
-                if (streak > best_streak) {
-                    client.db.query(`UPDATE users SET best_streak = ? WHERE username = ?`, [streak, username]);
-                }
-
-                const randomMessage = successMessages[Math.floor(Math.random() * successMessages.length)];
-
-                const embed = new EmbedBuilder()
-                    .setColor(0x2ecc71)
-                    .setTitle(randomMessage)
-                    .setDescription(`**${username}** guessed "**${coasterName}**" correctly!`)
-                    .addFields(
-                        { name: '<a:Medaille:1367883558839914516> Crédit(s)', value: `+${creditGain}`, inline: true },
-                        { name: '🔥 Streak', value: `${streak}`, inline: true }
-                    );
-
-                message.reply({ embeds: [embed] }).catch(console.error);
-                delete client.activeGuesses[message.author.id]; // ✅ supprimer seulement après le succès
-            });
-        });
-    });
+    // Utilisation des DAO pour le système classique
+    (async () => {
+        try {
+            await UserCoasterDao.insertIfNotExists({ username, coasterName });
+            await UserDao.insertClassicIfNotExists({ username, guildId: message.guildId });
+            await UserDao.updateClassicStats({ username, creditGain });
+            const stats = await UserDao.getStats({ username });
+            if (stats && stats.streak > stats.best_streak) {
+                await UserDao.updateBestStreak({ username, streak: stats.streak });
+            }
+            const randomMessage = successMessages[Math.floor(Math.random() * successMessages.length)];
+            const embed = new EmbedBuilder()
+                .setColor(0x2ecc71)
+                .setTitle(randomMessage)
+                .setDescription(`**${username}** guessed "**${coasterName}**" correctly!`)
+                .addFields(
+                    { name: '<a:Medaille:1367883558839914516> Crédit(s)', value: `+${creditGain}`, inline: true },
+                    { name: '🔥 Streak', value: `${stats ? stats.streak : 0}`, inline: true }
+                );
+            await message.reply({ embeds: [embed] });
+            delete client.activeGuesses[message.author.id];
+        } catch (err) {
+            console.error(err);
+        }
+    })();
 });
 
 
