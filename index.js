@@ -134,6 +134,7 @@ client.on('messageCreate', async message => {
             (async () => {
                 try {
                     await UserDao.insertIfNotExists({ username, guildId: message.guildId });
+                    await UserCoasterDao.insertIfNotExists({ username, coasterName });
                     await UserDao.updateCompetitionWinner({ username });
 
                     const embed = new EmbedBuilder()

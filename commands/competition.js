@@ -65,7 +65,7 @@ module.exports = {
                 interaction.editReply({ embeds: [createEmbed(`Time left: **${secondsLeft}s**`)] }).catch(console.error);
             }, 1000);
 
-            setTimeout(() => {
+            setTimeout(async () => {
                 const active = client.currentCompetition;
                 if (active && !active.hasWinner && Date.now() > active.timeout) {
                     client.currentCompetition = null;
@@ -75,7 +75,7 @@ module.exports = {
                         .setDescription("Nobody guessed the coaster in time.")
                         .setColor(0xd9534f);
 
-                    interaction.followUp({ embeds: [timeoutEmbed] }).catch(console.error);
+                    interaction.followUp({ embeds: [timeoutEmbed] });
                 }
             }, secondsLeft * 1000);
         } catch (error) {
