@@ -90,7 +90,7 @@ module.exports = {
                 const active = client.activeGuesses[userId];
                 if (!active || secondsLeft <= 0 || Date.now() > active.timeout) {
                     clearInterval(interval);
-                    interaction.editReply({ embeds: [createEmbed(`Time's up!`)] });
+                    interaction.editReply({ embeds: [createEmbed(`⏱️ Time's up!`)] });
                     return;
                 }
 
