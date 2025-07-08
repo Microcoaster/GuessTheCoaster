@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
 const UserDao = require('../dao/userDao');
 
 module.exports = {
@@ -19,7 +19,7 @@ module.exports = {
         if (interaction.user.id !== '634433284285268006') {
             return interaction.reply({
                 content: "Only **Cybertrist** is allowed to use this command.",
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
         }
 
@@ -34,7 +34,7 @@ module.exports = {
             if ((value && isContributor) || (!value && !isContributor)) {
                 return interaction.reply({
                     content: `**${user.username}** is already ${value ? 'a' : 'not a'} contributor.`,
-                    ephemeral: true
+                    flags: MessageFlags.Ephemeral
                 });
             }
 
@@ -54,10 +54,10 @@ module.exports = {
                 .setDescription(`**${user.username}** is now ${value ? 'marked as a contributor' : 'removed from contributors'}.`)
                 .setColor(value ? 0x2ecc71 : 0xe74c3c);
 
-            interaction.reply({ embeds: [embed], ephemeral: true });
+            interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
         } catch (error) {
             console.error(error);
-            interaction.reply({ content: "An error occurred during update.", ephemeral: true });
+            interaction.reply({ content: "An error occurred during update.", flags: MessageFlags.Ephemeral });
         }
     }
 };

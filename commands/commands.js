@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
 
 const bannerImages = [
     "https://media.discordapp.net/attachments/1367776168673280090/1368187454779297813/ngwoe1e42ag61.png",
@@ -72,6 +72,6 @@ module.exports = {
                 `**/endgame** – *cancel the current guessing round if needed.*\n\n`
             );
 
-        await interaction.reply({ embeds: [embed], ephemeral: true });
+        await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
     }
 };

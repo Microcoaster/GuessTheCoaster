@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
 const UserDao = require('../dao/userDao');
 
 module.exports = {
@@ -22,7 +22,7 @@ module.exports = {
                 if (!isContributor) {
                     return interaction.reply({
                         content: "You are not authorized to cancel another user's guess.",
-                        ephemeral: true
+                        flags: MessageFlags.Ephemeral
                     });
                 }
 
@@ -31,7 +31,7 @@ module.exports = {
                 console.error(error);
                 return interaction.reply({
                     content: "Error checking permissions.",
-                    ephemeral: true
+                    flags: MessageFlags.Ephemeral
                 });
             }
         } else {
@@ -44,7 +44,7 @@ function endGuess(user, interaction, client) {
     if (!client.activeGuesses[user.id]) {
         return interaction.reply({
             content: "No active guess found for this user.",
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
     }
 

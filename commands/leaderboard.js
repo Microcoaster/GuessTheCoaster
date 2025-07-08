@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, MessageFlags } = require('discord.js');
 const CoasterDao = require('../dao/coasterDao');
 const UserDao = require('../dao/userDao');
 
@@ -152,7 +152,7 @@ module.exports = {
             });
         } catch (error) {
             console.error(error);
-            interaction.reply({ content: 'Error while fetching leaderboard data.', ephemeral: true });
+            interaction.reply({ content: 'Error while fetching leaderboard data.', flags: MessageFlags.Ephemeral });
         }
     }
 };

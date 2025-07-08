@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
 const UserDao = require('../dao/userDao');
 const UserCoasterDao = require('../dao/userCoasterDao');
 
@@ -24,7 +24,7 @@ module.exports = {
                     .setTitle('User Profile Not Found!')
                     .setDescription('This user has never played before.\nStart by using the **/guess** command to create a profile!')
                     .setColor(0xd9534f);
-                return interaction.reply({ embeds: [notFoundEmbed], ephemeral: true });
+                return interaction.reply({ embeds: [notFoundEmbed], flags: MessageFlags.Ephemeral });
             }
 
             const { credits, streak, best_streak, contributor, competition_winner, has_completed } = profile;
@@ -103,7 +103,7 @@ module.exports = {
             console.error(error);
             interaction.reply({
                 content: 'An error occurred while fetching profile data.',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
         }
     }

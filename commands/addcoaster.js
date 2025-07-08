@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
 const UserDao = require('../dao/userDao');
 const CoasterDao = require('../dao/coasterDao');
 
@@ -37,7 +37,7 @@ module.exports = {
         } catch {
             return interaction.reply({
                 content: "Invalid image URL. Please provide a valid link starting with http:// or https://.",
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
         }
 
@@ -47,7 +47,7 @@ module.exports = {
             if (!isContributor) {
                 return interaction.reply({
                     content: "You are not authorized to use this command. Only contributors can add coasters.",
-                    ephemeral: true
+                    flags: MessageFlags.Ephemeral
                 });
             }
 
@@ -55,7 +55,7 @@ module.exports = {
             if (!["easy", "medium", "hard"].includes(difficulty)) {
                 return interaction.reply({
                     content: "Invalid difficulty. Please choose from `easy`, `medium`, or `hard`.",
-                    ephemeral: true
+                    flags: MessageFlags.Ephemeral
                 });
             }
 
@@ -66,7 +66,7 @@ module.exports = {
             if (exists) {
                 return interaction.reply({
                     content: `A coaster named **${name}** already exists in the database.`,
-                    ephemeral: true
+                    flags: MessageFlags.Ephemeral
                 });
             }
 
@@ -103,7 +103,7 @@ module.exports = {
             console.error(error);
             interaction.reply({
                 content: "An error occurred while processing your request.",
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
         }
     }

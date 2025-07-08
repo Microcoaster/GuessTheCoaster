@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
 const CoasterDao = require('../dao/coasterDao');
 const UserDao = require('../dao/userDao');
 
@@ -31,7 +31,7 @@ module.exports = {
             }
 
             if (!coaster) {
-                return interaction.reply({ content: 'No coaster found for that difficulty.', ephemeral: true });
+                return interaction.reply({ content: 'No coaster found for that difficulty.', flags: MessageFlags.Ephemeral });
             }
 
             const userId = interaction.user.id;
@@ -39,7 +39,7 @@ module.exports = {
             if (client.activeGuesses && client.activeGuesses[userId]) {
                 return interaction.reply({
                     content: 'You already have a round active! Please answer it before starting a new one.',
-                    ephemeral: true
+                    flags: MessageFlags.Ephemeral
                 });
             }
 
@@ -118,7 +118,7 @@ module.exports = {
             }, secondsLeft * 1000);            
         } catch (error) {
             console.error(error);
-            interaction.reply({ content: 'Error while fetching coaster data.', ephemeral: true });
+            interaction.reply({ content: 'Error while fetching coaster data.', flags: MessageFlags.Ephemeral });
         }
     }
 };

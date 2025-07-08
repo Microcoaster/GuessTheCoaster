@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
 const CoasterDao = require('../dao/coasterDao');
 
 module.exports = {
@@ -10,7 +10,7 @@ module.exports = {
         if (client.currentCompetition && Date.now() < client.currentCompetition.timeout) {
             return interaction.reply({
                 content: 'A competition is already in progress!',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
         }
 
@@ -19,7 +19,7 @@ module.exports = {
             if (!coaster) {
                 return interaction.reply({
                     content: 'Failed to fetch a coaster from the database.',
-                    ephemeral: true
+                    flags: MessageFlags.Ephemeral
                 });
             }
 
@@ -82,7 +82,7 @@ module.exports = {
             console.error(error);
             interaction.reply({
                 content: 'An error occurred while starting the competition.',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
         }
     }
