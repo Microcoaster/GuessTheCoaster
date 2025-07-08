@@ -3,7 +3,7 @@
 **GuessTheCoaster** is a community-driven Discord bot where users guess the names of roller coasters based on images. Collect coasters, earn credits, build your streak, and climb the leaderboard. If you love theme parks and quizzes, you're in the right place!
 
 <p align="center">
-  <img src="[https://discord.com/channels/1367634625102479472/1367776168673280090/1392135506518737018](https://media.discordapp.net/attachments/1367776168673280090/1392135506086858803/roller-coaster-526534_1280.jpg?ex=686e6eb9&is=686d1d39&hm=cdd155bdc8ca4bf1a76658d49f9890c26520a04f050d151c3cb6e355428dc1a8&=&format=webp)" alt="Banner"/>
+  <img src="https://media.discordapp.net/attachments/1367776168673280090/1392135506086858803/roller-coaster-526534_1280.jpg?ex=686e6eb9&is=686d1d39&hm=cdd155bdc8ca4bf1a76658d49f9890c26520a04f050d151c3cb6e355428dc1a8&=&format=webp" alt="Banner"/>
 </p>
 
 ## 🚀 Features
