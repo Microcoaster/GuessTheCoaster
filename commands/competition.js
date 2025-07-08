@@ -60,7 +60,7 @@ module.exports = {
                 const active = client.currentCompetition;
                 if (!active || active.hasWinner || secondsLeft <= 0 || Date.now() > active.timeout) {
                     clearInterval(interval);
-                    if (active && !active.hasWinner) {
+                    if (secondsLeft == 0) {
                         interaction.editReply({ embeds: [createEmbed(`⏱️ Time's up!`)] }).catch(console.error);
                     }
                     return;
@@ -71,12 +71,6 @@ module.exports = {
 
             setTimeout(async () => {
                 const active = client.currentCompetition;
-                console.log('Competition timeout triggered:', {
-                    hasActive: !!active,
-                    hasWinner: active?.hasWinner,
-                    timeExpired: active ? Date.now() > active.timeout : 'N/A'
-                });
-                
                 if (active && !active.hasWinner) {
                     client.currentCompetition = null;
 
@@ -87,12 +81,9 @@ module.exports = {
 
                     try {
                         await interaction.followUp({ embeds: [timeoutEmbed] });
-                        console.log('Competition timeout message sent successfully');
                     } catch (error) {
                         console.error('Error sending competition timeout message:', error);
                     }
-                } else {
-                    console.log('Competition timeout skipped:', active ? 'Winner found' : 'No active competition');
                 }
             }, timeoutDuration);
         } catch (error) {

@@ -104,7 +104,7 @@ module.exports = {
             
                     const timeoutEmbed = new EmbedBuilder()
                         .setTitle("⏱️ Time's Up!")
-                        .setDescription("Nobody Guessed the Correct Roller Coaster!")
+                        .setDescription(`Nobody Guessed the Correct Roller Coaster!\n\n**Answer:** ${coaster.name}`)
                         .setColor(0xd9534f);
                         
                     try {
