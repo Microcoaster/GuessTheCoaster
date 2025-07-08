@@ -52,13 +52,17 @@ module.exports = {
                 message: replyMessage
             };
 
+            const timeoutDuration = secondsLeft * 1000;
+
             const interval = setInterval(() => {
                 secondsLeft--;
 
                 const active = client.currentCompetition;
-                if (!active || secondsLeft <= 0 || Date.now() > active.timeout) {
+                if (!active || active.hasWinner || secondsLeft <= 0 || Date.now() > active.timeout) {
                     clearInterval(interval);
-                    interaction.editReply({ embeds: [createEmbed(`⏱️ Time's up!`)] }).catch(console.error);
+                    if (active && !active.hasWinner) {
+                        interaction.editReply({ embeds: [createEmbed(`⏱️ Time's up!`)] }).catch(console.error);
+                    }
                     return;
                 }
 
@@ -67,17 +71,30 @@ module.exports = {
 
             setTimeout(async () => {
                 const active = client.currentCompetition;
-                if (active && !active.hasWinner && Date.now() > active.timeout) {
+                console.log('Competition timeout triggered:', {
+                    hasActive: !!active,
+                    hasWinner: active?.hasWinner,
+                    timeExpired: active ? Date.now() > active.timeout : 'N/A'
+                });
+                
+                if (active && !active.hasWinner) {
                     client.currentCompetition = null;
 
                     const timeoutEmbed = new EmbedBuilder()
                         .setTitle("⏱️ Time's Up!")
-                        .setDescription("Nobody guessed the coaster in time.")
+                        .setDescription(`Nobody guessed the coaster in time.\n\n**Answer:** ${coaster.name}`)
                         .setColor(0xd9534f);
 
-                    interaction.followUp({ embeds: [timeoutEmbed] });
+                    try {
+                        await interaction.followUp({ embeds: [timeoutEmbed] });
+                        console.log('Competition timeout message sent successfully');
+                    } catch (error) {
+                        console.error('Error sending competition timeout message:', error);
+                    }
+                } else {
+                    console.log('Competition timeout skipped:', active ? 'Winner found' : 'No active competition');
                 }
-            }, secondsLeft * 1000);
+            }, timeoutDuration);
         } catch (error) {
             console.error(error);
             interaction.reply({

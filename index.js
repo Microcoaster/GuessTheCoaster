@@ -125,10 +125,8 @@ client.on('messageCreate', async message => {
             const username = message.author.username;
             const coasterName = client.currentCompetition.name;
 
+            // Marquer immédiatement qu'il y a un gagnant pour empêcher le timeout
             client.currentCompetition.hasWinner = true;
-            client.currentCompetition = null;
-
-
 
             // Utilisation du DAO pour la compétition
             (async () => {
@@ -150,7 +148,7 @@ client.on('messageCreate', async message => {
                     await message.channel.send({ embeds: [embed] });
 
                     // 🛠 Met à jour l'embed initial de la compétition
-                    if (client.currentCompetition && !client.currentCompetition.hasWinner) {
+                    if (client.currentCompetition && client.currentCompetition.message) {
                         const originalEmbed = client.currentCompetition.message.embeds?.[0];
                         if (originalEmbed) {
                             const updatedEmbed = EmbedBuilder.from(originalEmbed)
@@ -164,13 +162,10 @@ client.on('messageCreate', async message => {
                         }
                     }
 
-                    // ✅ Marque la victoire
-                    if (client.currentCompetition) {
-                        client.currentCompetition.hasWinner = true;
-                        client.currentCompetition = null;
-                    }
+                    // ✅ Nettoyer la compétition après avoir mis à jour l'embed
+                    client.currentCompetition = null;
                 } catch (err) {
-                    console.error(err);
+                    console.error('Error handling competition winner:', err);
                 }
             })();
 
