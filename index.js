@@ -1,5 +1,6 @@
 const { Client, GatewayIntentBits, Collection, REST, Routes, EmbedBuilder } = require('discord.js');
 const fs = require('fs');
+const stringSimilarity = require("string-similarity");
 // Gestion MySQL via DAO
 const { pool, getSharedConnection } = require('./utils/dbManager');
 const UserDao = require('./dao/userDao');
@@ -119,7 +120,18 @@ client.on('messageCreate', async message => {
             client.currentCompetition.alias?.toLowerCase()
         ].filter(Boolean);
 
-        const isCorrect = validAnswers.some(answer => guess.includes(answer));
+        // Vérification exacte d'abord
+        let isCorrect = validAnswers.some(answer => guess.includes(answer));
+        let correctAnswer = null;
+
+        // Si pas de correspondance exacte, vérifier la similarité
+        if (!isCorrect) {
+            const similarity = stringSimilarity.findBestMatch(guess, validAnswers);
+            if (similarity.bestMatch.rating >= 0.7) { // Seuil de 70% de similarité
+                isCorrect = true;
+                correctAnswer = similarity.bestMatch.target;
+            }
+        }
 
         if (isCorrect) {
             const username = message.author.username;
@@ -138,7 +150,7 @@ client.on('messageCreate', async message => {
                     const embed = new EmbedBuilder()
                         .setColor(0xf1c40f)
                         .setTitle("🏆 Competition Won!")
-                        .setDescription(`**${username}** was the first to guess **${coasterName}**!`)
+                        .setDescription(`**${username}** was the first to guess **${coasterName}**!${correctAnswer ? `\n📝 *Correct answer: ${correctAnswer}*` : ''}`)
                         .addFields({
                             name: '<:trophe:1368024238371508315> Reward',
                             value: `+5 credits & unlocked the competition badge!`,
@@ -188,7 +200,19 @@ client.on('messageCreate', async message => {
         userGuess.alias?.toLowerCase()
     ].filter(Boolean);
 
-    const isCorrect = validAnswers.some(answer => guess.includes(answer));
+    // Vérification exacte d'abord
+    let isCorrect = validAnswers.some(answer => guess.includes(answer));
+    let correctAnswer = null;
+
+    // Si pas de correspondance exacte, vérifier la similarité
+    if (!isCorrect) {
+        const similarity = stringSimilarity.findBestMatch(guess, validAnswers);
+        if (similarity.bestMatch.rating >= 0.8) { // Seuil de 80% de similarité
+            isCorrect = true;
+            correctAnswer = similarity.bestMatch.target;
+        }
+    }
+
     if (!isCorrect) return;
 
     const username = message.author.username;
@@ -213,7 +237,7 @@ client.on('messageCreate', async message => {
             const embed = new EmbedBuilder()
                 .setColor(0x2ecc71)
                 .setTitle(randomMessage)
-                .setDescription(`**${username}** guessed "**${coasterName}**" correctly!`)
+                .setDescription(`**${username}** guessed "**${coasterName}**" correctly!${correctAnswer ? `\n📝 *Correct answer: ${correctAnswer}*` : ''}`)
                 .addFields(
                     { name: '<a:Medaille:1367883558839914516> Crédit(s)', value: `+${creditGain}`, inline: true },
                     { name: '🔥 Streak', value: `${stats ? stats.streak : 0}`, inline: true }
