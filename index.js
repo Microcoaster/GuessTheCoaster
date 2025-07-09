@@ -1,4 +1,4 @@
-const { Client, GatewayIntentBits, Collection, REST, Routes, EmbedBuilder } = require('discord.js');
+const { Client, GatewayIntentBits, Collection, REST, Routes, EmbedBuilder, MessageFlags } = require('discord.js');
 const fs = require('fs');
 const stringSimilarity = require("string-similarity");
 // Gestion MySQL via DAO
@@ -72,7 +72,7 @@ client.on('interactionCreate', async interaction => {
         await command.execute(interaction, client);
     } catch (error) {
         console.error(error);
-        await interaction.reply({ content: 'Erreur lors de l’exécution de la commande.', ephemeral: true });
+        await interaction.reply({ content: 'Erreur lors de l’exécution de la commande.', flags: MessageFlags.Ephemeral });
     }
 });
 
