@@ -45,7 +45,10 @@ module.exports = {
 
             const formatList = (list, label) => {
                 return list.map((row, i) => {
-                    let value = row.credits || row.best_streak || row.collected || 0;
+                    let value;
+                    if (label === 'streak') value = row.best_streak;
+                    else if (label === 'completion') value = row.collected;
+                    else value = row.credits;
                     if (label === 'completion') {
                         const percent = ((value / totalCoasters) * 100).toFixed(2);
                         return `**${i + 1})** ${row.username} | **${percent}%** Completion`;
