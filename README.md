@@ -40,8 +40,6 @@ Côté `coasters`, `alias` porte le surnom d'un coaster, accepté au même titre
 
 <img src="docs/sections/s04.png" alt="04 Installation" width="100%">
 
-<img src="docs/blocs/01.png" alt="Terminal bash : installation" width="100%">
-
 ```bash
 git clone https://github.com/Microcoaster/GuessTheCoaster.git
 cd GuessTheCoaster
@@ -50,8 +48,6 @@ cp .env.example .env
 ```
 
 Renseigner `.env` avec le token du bot, récupéré sur le [portail développeur Discord](https://discord.com/developers/applications), et les accès à la base.
-
-<img src="docs/blocs/02.png" alt="Terminal bash : lancer le bot" width="100%">
 
 ```bash
 npm start
