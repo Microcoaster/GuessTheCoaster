@@ -4,60 +4,39 @@
 
 </div>
 
-Jeu Discord pour passionnés de parcs. Le bot poste la photo d'une montagne russe, les joueurs devinent son nom. Bonne réponse, des crédits et une série qui grandit. Mauvaise réponse, la série repart de zéro.
+Jeu Discord pour passionnés de parcs. Un joueur lance une manche, le bot affiche la photo d'une montagne russe, et il faut la reconnaître avant la fin du compte à rebours.
 
-Les coasters devinés s'accumulent dans une collection personnelle, et le classement départage ceux qui les reconnaissent le plus vite.
+Deux façons d'y jouer. Seul, à la difficulté de son choix, pour faire grandir sa collection et sa série. Ou en compétition ouverte, où tout le serveur cherche en même temps et où seul le premier à répondre l'emporte.
 
 <img src="docs/sections/s01.png" alt="01 Le jeu" width="100%">
 
-<img src="docs/schemas/jeu.png" alt="Le bot poste une photo, les joueurs répondent avec /guess, bonne réponse : crédits et série prolongée, mauvaise réponse : série remise à zéro" width="100%">
+<img src="docs/schemas/modes.png" alt="Manche solo, commande /guess : le joueur ouvre sa manche et choisit la difficulté ou la laisse au hasard, le bot poste la photo et décompte le temps restant, le joueur écrit sa réponse dans le salon. Trouvé : crédits selon la difficulté, série prolongée, coaster ajouté à la collection. Temps écoulé : la réponse est révélée et la série repart de zéro. Compétition, commande /competition : un round public s'ouvre pour soixante secondes, tout le serveur peut répondre en même temps, le premier à tomber juste ferme le round. Gagné : cinq crédits et le badge Compétition. Manqué : une mauvaise réponse ne coûte rien." width="100%">
 
-La collection est ce qui donne envie de revenir. Un coaster déjà trouvé reste acquis, et le profil montre ce qui manque.
+En solo, la difficulté fixe à la fois le temps disponible et ce que vaut la bonne réponse.
+
+<img src="docs/schemas/difficultes.png" alt="Easy : soixante secondes pour répondre, un crédit à la clé. Medium : quarante-cinq secondes, deux crédits. Hard : trente secondes et trois crédits, le barème récompense le risque." width="100%">
+
+Sans argument, `/guess` tire un coaster au hasard et applique le barème de sa difficulté réelle. Un joueur ne peut avoir qu'une manche ouverte à la fois.
+
+Les réponses ne sont pas comparées au caractère près : le nom officiel comme le surnom sont acceptés, et une faute de frappe passe tant que la ressemblance reste au-dessus de 80 %, seuil abaissé à 70 % en compétition pour récompenser la vitesse.
+
+La collection est ce qui donne envie de revenir. Un coaster déjà trouvé reste acquis, y compris quand il a été gagné en compétition, et le profil montre ce qui manque.
 
 <img src="docs/sections/s02.png" alt="02 Commandes" width="100%">
 
-**Jouer**
-
-| Commande | Rôle |
-|:--|:--|
-| `/guess` | Proposer une réponse |
-| `/profile` | Collection, crédits et série d'un joueur |
-| `/badges` | Badges obtenus |
-| `/leaderboard` | Classement général |
-
-**Compétitions**
-
-| Commande | Rôle |
-|:--|:--|
-| `/competition` | Lancer une partie chronométrée |
-| `/endgame` | Clore la partie en cours |
-
-**Administration**
-
-| Commande | Rôle |
-|:--|:--|
-| `/addcoaster` | Ajouter un coaster à la base |
-| `/addcontributor` | Créditer un contributeur |
-
-**Utilitaires**
-
-| Commande | Rôle |
-|:--|:--|
-| `/commands` | Liste des commandes |
-| `/about` | À propos du bot |
-| `/ping` | Vérifier que le bot répond |
+<img src="docs/schemas/commandes.png" alt="Jouer : /guess ouvre une manche solo au hasard ou à la difficulté choisie, /competition ouvre un round public de soixante secondes, /endgame clôt le round en cours. Profil : /profile donne collection, crédits, série en cours et record, /badges les badges obtenus, /leaderboard le classement général du serveur. Administration : /addcoaster ajoute un coaster à la base, /addcontributor marque un joueur comme contributeur. Utilitaires : /commands liste les commandes disponibles, /about donne les informations du bot, /ping vérifie qu'il répond." width="100%">
 
 <img src="docs/sections/s03.png" alt="03 Données" width="100%">
 
 Trois tables, une par question.
 
-| Table | Question à laquelle elle répond |
-|:--|:--|
-| `users` | Qui joue, avec combien de crédits et quelle série |
-| `coasters` | Quels coasters existent, avec leur photo et leur parc |
-| `user_coasters` | Qui a trouvé quoi, et quand |
+<img src="docs/schemas/donnees.png" alt="users : qui joue, avec quels crédits, quelle série en cours, quel record et quels badges. coasters : quels coasters existent, avec leur photo, leur parc, leur difficulté et le surnom accepté. user_coasters : qui a trouvé quoi, une ligne par joueur et par coaster, ce qui constitue la collection." width="100%">
 
-La troisième est ce qui fait la collection : une ligne par joueur et par coaster trouvé.
+La troisième est ce qui fait la collection : une ligne par joueur et par coaster trouvé, insérée seulement si elle n'existe pas déjà.
+
+Dans `users`, `streak` est la série en cours et `best_streak` le record, conservé même quand la série retombe. Les deux badges sont des marqueurs sur la ligne du joueur : `competition_winner` pour une victoire en compétition, `contributor` pour ceux qui ont enrichi la base.
+
+Côté `coasters`, `alias` porte le surnom d'un coaster, accepté au même titre que son nom officiel. C'est ce qui évite de recaler un joueur qui a reconnu la bonne machine mais l'appelle autrement.
 
 <img src="docs/sections/s04.png" alt="04 Installation" width="100%">
 
