@@ -8,7 +8,7 @@ Jeu Discord pour passionnés de parcs. Le bot poste la photo d'une montagne russ
 
 Les coasters devinés s'accumulent dans une collection personnelle, et le classement départage ceux qui les reconnaissent le plus vite.
 
-## Comment ça se joue
+<img src="docs/sections/s01.png" alt="01 Le jeu" width="100%">
 
 ```
 Le bot poste une photo
@@ -19,7 +19,7 @@ Mauvaise         série remise à zéro
 
 La collection est ce qui donne envie de revenir. Un coaster déjà trouvé reste acquis, et le profil montre ce qui manque.
 
-## Commandes
+<img src="docs/sections/s02.png" alt="02 Commandes" width="100%">
 
 **Jouer**
 
@@ -52,7 +52,7 @@ La collection est ce qui donne envie de revenir. Un coaster déjà trouvé reste
 | `/about` | À propos du bot |
 | `/ping` | Vérifier que le bot répond |
 
-## Données
+<img src="docs/sections/s03.png" alt="03 Données" width="100%">
 
 Trois tables, une par question.
 
@@ -64,7 +64,7 @@ Trois tables, une par question.
 
 La troisième est ce qui fait la collection : une ligne par joueur et par coaster trouvé.
 
-## Installation
+<img src="docs/sections/s04.png" alt="04 Installation" width="100%">
 
 ```bash
 git clone https://github.com/Microcoaster/GuessTheCoaster.git
@@ -81,7 +81,7 @@ npm start
 
 Les commandes slash s'enregistrent au démarrage. Comptez jusqu'à une heure avant qu'elles apparaissent partout si elles sont publiées globalement.
 
-## Contribuer
+<img src="docs/sections/s05.png" alt="05 Contribuer" width="100%">
 
 Le jeu vit de sa base de coasters. Ajouter des entrées avec de bonnes photos est la contribution la plus utile, et `/addcontributor` sert à créditer ceux qui le font.
 
@@ -89,4 +89,4 @@ Pour le code, le cycle est celui de l'organisation : une issue décrit le travai
 
 ---
 
-<sub>MicroCoaster · microcoaster.com</sub>
+<sub>MicroCoaster · Auteur : Cybertrist</sub>
