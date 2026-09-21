@@ -11,7 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "discord.js": "^14.19.2",
-    "dotenv": "^16.5.0",
+    "dotenv": "^18.0.0",
     "GuessTheCoaster": "file:",
     "mysql2": "^3.14.1",
     "string-similarity": "^4.0.4"
