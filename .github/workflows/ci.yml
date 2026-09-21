@@ -1,0 +1,31 @@
+name: CI
+
+# Le dépôt n'a pas encore de tests. Ce workflow vérifie au moins que le
+# projet s'installe et que chaque fichier est syntaxiquement valide : une
+# commande cassée ne part plus en production sans qu'on le sache.
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  controle:
+    name: Installation et syntaxe
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Installer les dépendances
+        run: npm ci
+
+      - name: Vérifier la syntaxe de chaque fichier
+        run: |
+          set -e
+          find . -name '*.js' -not -path './node_modules/*' -print0 \
+            | xargs -0 -n1 node --check
