@@ -10,12 +10,7 @@ Les coasters devinés s'accumulent dans une collection personnelle, et le classe
 
 <img src="docs/sections/s01.png" alt="01 Le jeu" width="100%">
 
-```
-Le bot poste une photo
-Les joueurs répondent avec /guess
-Bonne réponse    crédits gagnés, série prolongée, coaster ajouté à la collection
-Mauvaise         série remise à zéro
-```
+<img src="docs/schemas/jeu.png" alt="Le bot poste une photo, les joueurs répondent avec /guess, bonne réponse : crédits et série prolongée, mauvaise réponse : série remise à zéro" width="100%">
 
 La collection est ce qui donne envie de revenir. Un coaster déjà trouvé reste acquis, et le profil montre ce qui manque.
 
