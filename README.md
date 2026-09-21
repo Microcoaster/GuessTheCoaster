@@ -4,121 +4,89 @@
 
 </div>
 
+Jeu Discord pour passionnés de parcs. Le bot poste la photo d'une montagne russe, les joueurs devinent son nom. Bonne réponse, des crédits et une série qui grandit. Mauvaise réponse, la série repart de zéro.
 
-**GuessTheCoaster** is a community-driven Discord bot where users guess the names of roller coasters based on images. Collect coasters, earn credits, build your streak, and climb the leaderboard. If you love theme parks and quizzes, you're in the right place!
+Les coasters devinés s'accumulent dans une collection personnelle, et le classement départage ceux qui les reconnaissent le plus vite.
 
-<p align="center">
-  <img src="https://media.discordapp.net/attachments/1367776168673280090/1367776189124710421/Toutatis-3-min-1024x682.png?ex=68f740d7&is=68f5ef57&hm=4a1f23fa7e1e25691168a088d8cc7dba5c145b3fea65815eba7f646d057799d9&=&format=webp&quality=lossless" width="600" alt="Banner"/>
-</p>
+## Comment ça se joue
 
-## 🚀 Features
+```
+Le bot poste une photo
+Les joueurs répondent avec /guess
+Bonne réponse    crédits gagnés, série prolongée, coaster ajouté à la collection
+Mauvaise         série remise à zéro
+```
 
-- 🖼️ Image-based coaster guessing
-- 🧠 Streak and best streak tracking
-- 🪙 Credit system with difficulties: Easy / Medium / Hard
-- 🏆 User profiles with collectible stats and dynamic badges
-- 📈 Global and local leaderboards (`/leaderboard`)
-- 🎖️ Contributor system (submit coasters!)
-- 🛠️ Admin commands for managing contributors and coasters
+La collection est ce qui donne envie de revenir. Un coaster déjà trouvé reste acquis, et le profil montre ce qui manque.
 
-## 📸 How It Works
+## Commandes
 
-1. Use `/guess` to start a round.
-2. The bot sends you an image of a coaster.
-3. Type the correct name (or accepted alias) in chat.
-4. Get rewarded with credits & streaks if correct. Missed it? Your streak resets!
-5. View your profile with `/profile`.
+**Jouer**
 
-## 🛡️ Roles & Badges
+| Commande | Rôle |
+|:--|:--|
+| `/guess` | Proposer une réponse |
+| `/profile` | Collection, crédits et série d'un joueur |
+| `/badges` | Badges obtenus |
+| `/leaderboard` | Classement général |
 
-- Contributor  
-- 50% of coasters collected  
-- All coasters collected  
-- 10-win streak  
-- 50-win streak  
-- The mythical creator
+**Compétitions**
 
-> 🛠️ *More badges coming soon... once the dev stops riding coasters and working on microcoaster launch systems!*
+| Commande | Rôle |
+|:--|:--|
+| `/competition` | Lancer une partie chronométrée |
+| `/endgame` | Clore la partie en cours |
 
-## 🔧 Commands
+**Administration**
 
-| Command            | Description                                                    |
-|--------------------|----------------------------------------------------------------|
-| `/guess`           | Start a guessing round with a random coaster                   |
-| `/profile`         | View your profile or another user's stats                      |
-| `/leaderboard`     | Show leaderboard by credits, streaks, or completion            |
-| `/addcoaster`      | Add a new coaster to the database (contributors only)          |
-| `/addcontributor`  | Grant or remove contributor rights (owner only)                |
-| `/badges`          | Display all obtainable badges and their meaning                |
-| `/commands`        | List all available commands in the bot                         |
-| `/about`           | Learn more about the GuessTheCoaster bot                       |
-| `/ping`            | Check the bot’s latency and responsiveness                     |
-| `/competition`    | Lance une devinette ouverte, le premier à trouver gagne +5 crédits & un rôle spécial |
-| `/endgame`        | Termine la session de jeu en cours (si applicable)                                   |
-| `/competition`    | Launch an open challenge; first correct answer earns +5 credits & a special role |
-| `/endgame`        | End the current guessing session (if applicable)                                 |
+| Commande | Rôle |
+|:--|:--|
+| `/addcoaster` | Ajouter un coaster à la base |
+| `/addcontributor` | Créditer un contributeur |
 
-## 🧑‍💻 Dev Setup
+**Utilitaires**
 
-1. Clone the repository
+| Commande | Rôle |
+|:--|:--|
+| `/commands` | Liste des commandes |
+| `/about` | À propos du bot |
+| `/ping` | Vérifier que le bot répond |
 
-2. Create a `.env` file with:
+## Données
 
-DISCORD_TOKEN=your_token  
-CLIENT_ID=your_bot_id  
-DB_HOST=localhost  
-DB_USER=root  
-DB_PASS=your_password  
-DB_NAME=your_db
+Trois tables, une par question.
 
-3. Install dependencies:
+| Table | Question à laquelle elle répond |
+|:--|:--|
+| `users` | Qui joue, avec combien de crédits et quelle série |
+| `coasters` | Quels coasters existent, avec leur photo et leur parc |
+| `user_coasters` | Qui a trouvé quoi, et quand |
 
-`npm install`
+La troisième est ce qui fait la collection : une ligne par joueur et par coaster trouvé.
 
-4. Start the bot:
+## Installation
 
-`node index.js`
+```bash
+git clone https://github.com/Microcoaster/GuessTheCoaster.git
+cd GuessTheCoaster
+npm install
+cp .env.example .env
+```
 
-### 📄 `users`
+Renseigner `.env` avec le token du bot, récupéré sur le [portail développeur Discord](https://discord.com/developers/applications), et les accès à la base.
 
-| Column               | Type        | Description                                                   |
-| -------------------- | ----------- | ------------------------------------------------------------- |
-| `id`                 | INT         | Unique user ID (auto-incremented)                             |
-| `username`           | VARCHAR(50) | Unique username                                               |
-| `credits`            | INT         | Total credits earned                                          |
-| `streak`             | INT         | Current correct answer streak                                 |
-| `best_streak`        | INT         | Highest streak achieved                                       |
-| `last_played`        | DATETIME    | Last time the user played                                     |
-| `guild_id`           | VARCHAR(64) | Discord server (guild) ID                                     |
-| `contributor`        | BOOLEAN     | Whether the user is a contributor (1 = yes, 0 = no)           |
-| `competition_winner` | BOOLEAN     | Whether the user has won at least one `/competition` round    |
-| `has_completed`      | BOOLEAN     | Whether the user has guessed all available coasters correctly |
+```bash
+npm start
+```
 
+Les commandes slash s'enregistrent au démarrage. Comptez jusqu'à une heure avant qu'elles apparaissent partout si elles sont publiées globalement.
+
+## Contribuer
+
+Le jeu vit de sa base de coasters. Ajouter des entrées avec de bonnes photos est la contribution la plus utile, et `/addcontributor` sert à créditer ceux qui le font.
+
+Pour le code, le cycle est celui de l'organisation : une issue décrit le travail, une branche part de `develop`, une pull request revient dessus et passe en review.
 
 ---
 
-### 🎢 `coasters`
-
-| Column       | Type    | Description                                   |
-| ------------ | ------- | --------------------------------------------- |
-| `id`         | INT     | Unique coaster ID (auto-incremented)          |
-| `name`       | VARCHAR | Primary name of the coaster                   |
-| `alias`      | VARCHAR | Alternate name (can be `NULL`)                |
-| `difficulty` | ENUM    | Difficulty level: `easy`, `medium`, or `hard` |
-| `image_url`  | TEXT    | URL to the coaster image                      |
-
----
-
-### ✨ `user_coasters`
-
-| Column       | Type    | Description                                 |
-| ------------ | ------- | ------------------------------------------- |
-| `username`   | VARCHAR | Username of the player                      |
-| `coaster_id` | INT     | ID of the coaster they successfully guessed |
-
-## 🤝 Contribute
-
-Want to help by submitting coaster pictures or ideas?  
-Reach out via **Discord** and earn the 🎖️ **Contributor** badge!
-
-
+<sub>MicroCoaster · microcoaster.com</sub>
